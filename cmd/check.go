@@ -1,38 +1,43 @@
-/*
-Copyright © 2021 NAME HERE <EMAIL ADDRESS>
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
 package cmd
 
 import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"github.com/warrant-dev/warrant-go"
 )
 
-// checkCmd represents the check command
 var checkCmd = &cobra.Command{
 	Use:   "check",
-	Short: "Check access for a user",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Check a warrant for a user",
+	Long: `Check a warrant for a user
+	
+Example:
+	warrant check userId1 owner document doc23`,
+	Args: cobra.ExactArgs(4),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("check called")
+		apiKey := viper.GetString("key")
+		if apiKey == "" {
+			fmt.Println("Missing API key. Please define it in your config file or using the --key flag.")
+			return
+		}
+		client := warrant.NewClient(warrant.ClientConfig{
+			ApiKey: apiKey,
+		})
+		result, err := client.IsAuthorized(warrant.Warrant{
+			User: warrant.WarrantUser{
+				UserId: args[0],
+			},
+			Relation:   args[1],
+			ObjectType: args[2],
+			ObjectId:   args[3],
+		})
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Printf("Result--> %t\n", result)
 	},
 }
 
@@ -40,7 +45,6 @@ func init() {
 	rootCmd.AddCommand(checkCmd)
 
 	// Here you will define your flags and configuration settings.
-
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
 	// checkCmd.PersistentFlags().String("foo", "", "A help for foo")
