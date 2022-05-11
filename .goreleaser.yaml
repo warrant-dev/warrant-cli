@@ -1,0 +1,41 @@
+before:
+  hooks:
+    # - go mod tidy
+    # - go generate ./...
+builds:
+  - env:
+      - CGO_ENABLED=0
+    binary: warrant
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+archives:
+  - replacements:
+      darwin: Darwin
+      linux: Linux
+      windows: Windows
+      386: i386
+      amd64: x86_64
+checksum:
+  name_template: 'checksums.txt'
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+brews:
+  -
+    name: warrant
+    homepage: "https://warrant.dev"
+    tap:
+      owner: warrant-dev
+      name: homebrew-warrant
+      token: "{{ .Env.GH_TOKEN }}"
+    commit_author:
+      name: Warrant
+      email: hello@warrant.dev
