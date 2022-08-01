@@ -12,7 +12,7 @@ First, add your API key (prod or test) to your local config file in $HOME:
 
 ```bash
 cp .warrant.json ~/.warrant.json
-vi .warrant.json
+vi ~/.warrant.json
 ```
 
 ```bash
