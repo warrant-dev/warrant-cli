@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -15,12 +14,10 @@ var rootCmd = &cobra.Command{
 	Use:   "warrant",
 	Short: "Warrant CLI",
 	Long:  `The Warrant CLI is a tool to interact with Warrant via the command line.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
 }
 
 func Execute() {
+	// Execute requested cmd and handle any errors
 	cobra.CheckErr(rootCmd.Execute())
 }
 
@@ -55,8 +52,7 @@ func initConfig() {
 
 	viper.AutomaticEnv() // read in environment variables that match
 
-	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
-	}
+	// Read config file
+	err := viper.ReadInConfig()
+	cobra.CheckErr(err)
 }
