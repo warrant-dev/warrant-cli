@@ -35,7 +35,6 @@ brews:
     tap:
       owner: warrant-dev
       name: homebrew-warrant
-      token: "{{ .Env.GH_TOKEN }}"
     commit_author:
       name: Warrant
       email: hello@warrant.dev
