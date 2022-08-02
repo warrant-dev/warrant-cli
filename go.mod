@@ -8,6 +8,6 @@ require (
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/spf13/cobra v1.4.0
 	github.com/spf13/viper v1.11.0
-	github.com/warrant-dev/warrant-go v1.0.2
+	github.com/warrant-dev/warrant-go v1.2.0
 	golang.org/x/sys v0.0.0-20220422013727-9388b58f7150 // indirect
 )
