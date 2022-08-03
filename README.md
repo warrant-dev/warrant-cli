@@ -6,14 +6,25 @@ Interact with [Warrant](https://warrant.dev/) on your command line.
 
 ## Installation
 
-## Usage
-
-First, add your API key (prod or test) to your local config file in $HOME:
+### macOS (Using Homebrew)
 
 ```bash
-cp .warrant.json ~/.warrant.json
-vi ~/.warrant.json
+brew install warrant-dev/warrant/warrant
 ```
+
+### Binaries
+
+Latest binaries for Mac, Linux & Windows available [here](https://github.com/warrant-dev/warrant-cli/releases/latest)
+
+## Usage
+
+After download/installation, first init the CLI:
+
+```bash
+warrant init
+```
+
+Once initialized, CLI is ready for use:
 
 ```bash
 warrant [cmd] [args]
