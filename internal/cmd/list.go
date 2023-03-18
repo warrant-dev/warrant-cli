@@ -5,7 +5,10 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/warrant-dev/warrant-cli/internal/config"
-	"github.com/warrant-dev/warrant-go"
+	"github.com/warrant-dev/warrant-go/v3"
+	"github.com/warrant-dev/warrant-go/v3/permission"
+	"github.com/warrant-dev/warrant-go/v3/role"
+	"github.com/warrant-dev/warrant-go/v3/tenant"
 )
 
 func init() {
@@ -23,7 +26,7 @@ warrant list permissions`,
 	Args:      cobra.ExactValidArgs(1),
 	ValidArgs: []string{"roles", "tenants", "permissions"},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		client, err := config.GetClient()
+		err := config.InitClient()
 		if err != nil {
 			return err
 		}
@@ -34,7 +37,7 @@ warrant list permissions`,
 		requestedType := args[0]
 		switch requestedType {
 		case "roles":
-			roles, err := client.ListRoles(warrant.ListRoleParams{
+			roles, err := role.ListRoles(&warrant.ListRoleParams{
 				ListParams: listParams,
 			})
 			if err != nil {
@@ -45,7 +48,7 @@ warrant list permissions`,
 			}
 			return nil
 		case "tenants":
-			tenants, err := client.ListTenants(warrant.ListTenantParams{
+			tenants, err := tenant.ListTenants(&warrant.ListTenantParams{
 				ListParams: listParams,
 			})
 			if err != nil {
@@ -56,7 +59,7 @@ warrant list permissions`,
 			}
 			return nil
 		case "permissions":
-			permissions, err := client.ListPermissions(warrant.ListPermissionParams{
+			permissions, err := permission.ListPermissions(&warrant.ListPermissionParams{
 				ListParams: listParams,
 			})
 			if err != nil {
