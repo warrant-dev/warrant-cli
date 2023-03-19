@@ -5,6 +5,10 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/warrant-dev/warrant-cli/internal/config"
+	"github.com/warrant-dev/warrant-go/v3/permission"
+	"github.com/warrant-dev/warrant-go/v3/role"
+	"github.com/warrant-dev/warrant-go/v3/tenant"
+	"github.com/warrant-dev/warrant-go/v3/user"
 )
 
 func init() {
@@ -31,7 +35,7 @@ warrant delete user user-1`,
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		client, err := config.GetClient()
+		err := config.InitClient()
 		if err != nil {
 			return err
 		}
@@ -39,13 +43,13 @@ warrant delete user user-1`,
 		entityId := args[1]
 		switch entityType {
 		case "role":
-			err = client.DeleteRole(entityId)
+			err = role.Delete(entityId)
 		case "tenant":
-			err = client.DeleteTenant(entityId)
+			err = tenant.Delete(entityId)
 		case "permission":
-			err = client.DeletePermission(entityId)
+			err = permission.Delete(entityId)
 		case "user":
-			err = client.DeleteUser(entityId)
+			err = user.Delete(entityId)
 		default:
 			return fmt.Errorf("Invalid delete request")
 		}

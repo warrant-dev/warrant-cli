@@ -6,6 +6,9 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/warrant-dev/warrant-cli/internal/config"
 	"github.com/warrant-dev/warrant-cli/internal/reader"
+	"github.com/warrant-dev/warrant-go/v3/permission"
+	"github.com/warrant-dev/warrant-go/v3/role"
+	"github.com/warrant-dev/warrant-go/v3/user"
 )
 
 func init() {
@@ -29,18 +32,18 @@ warrant assign permission:perm2 role:admin`,
 		if err != nil {
 			return err
 		}
-		client, err := config.GetClient()
+		err = config.InitClient()
 		if err != nil {
 			return err
 		}
 		if subject.Type == "role" && object.Type == "user" {
-			_, err = client.AssignRoleToUser(object.Id, subject.Id)
+			_, err = role.AssignRoleToUser(subject.Id, object.Id)
 		} else if subject.Type == "permission" && object.Type == "user" {
-			_, err = client.AssignPermissionToUser(object.Id, subject.Id)
+			_, err = permission.AssignPermissionToUser(subject.Id, object.Id)
 		} else if subject.Type == "permission" && object.Type == "role" {
-			_, err = client.AssignPermissionToRole(object.Id, subject.Id)
+			_, err = permission.AssignPermissionToRole(subject.Id, object.Id)
 		} else if subject.Type == "user" && object.Type == "tenant" {
-			_, err = client.AssignUserToTenant(object.Id, subject.Id)
+			_, err = user.AssignUserToTenant(subject.Id, object.Id, "member")
 		} else {
 			return fmt.Errorf("Invalid assign request")
 		}

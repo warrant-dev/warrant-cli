@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/warrant-dev/warrant-cli/internal/config"
 	"github.com/warrant-dev/warrant-cli/internal/reader"
-	"github.com/warrant-dev/warrant-go"
+	"github.com/warrant-dev/warrant-go/v3"
 )
 
 func init() {
@@ -22,7 +22,7 @@ warrant check user:23 member role:admin
 warrant check role:admin editor document:45`,
 	Args: cobra.ExactArgs(3),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		client, err := config.GetClient()
+		err := config.InitClient()
 		if err != nil {
 			return err
 		}
@@ -35,17 +35,18 @@ warrant check role:admin editor document:45`,
 		if err != nil {
 			return err
 		}
-		warrantToCheck := warrant.Warrant{
-			ObjectType: object.Type,
-			ObjectId:   object.Id,
-			Relation:   relation,
-			Subject: warrant.Subject{
-				ObjectType: subject.Type,
-				ObjectId:   subject.Id,
+		result, err := warrant.Check(&warrant.WarrantCheckParams{
+			WarrantCheck: warrant.WarrantCheck{
+				Object: warrant.Object{
+					ObjectType: object.Type,
+					ObjectId:   object.Id,
+				},
+				Relation: relation,
+				Subject: warrant.Subject{
+					ObjectType: subject.Type,
+					ObjectId:   subject.Id,
+				},
 			},
-		}
-		result, err := client.IsAuthorized(warrant.WarrantCheckParams{
-			Warrants: []warrant.Warrant{warrantToCheck},
 		})
 		if err != nil {
 			return err

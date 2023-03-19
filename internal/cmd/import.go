@@ -9,7 +9,8 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/warrant-dev/warrant-cli/internal/config"
-	"github.com/warrant-dev/warrant-go"
+	"github.com/warrant-dev/warrant-go/v3"
+	"github.com/warrant-dev/warrant-go/v3/user"
 )
 
 func init() {
@@ -59,7 +60,7 @@ warrant import users users.csv
 		}
 
 		// Import from csv
-		client, err := config.GetClient()
+		err := config.InitClient()
 		if err != nil {
 			return err
 		}
@@ -82,7 +83,7 @@ warrant import users users.csv
 		// import entities
 		switch entityType {
 		case "users":
-			importUsers(data, client)
+			importUsers(data)
 		default:
 			return fmt.Errorf("Invalid import")
 		}
@@ -90,14 +91,14 @@ warrant import users users.csv
 	},
 }
 
-func importUsers(data [][]string, client warrant.WarrantClient) {
+func importUsers(data [][]string) {
 	fmt.Printf("Creating users...\n")
 	rowsProcessed := 0
 	usersCreated := 0
 	usersFailed := 0
 	for i, line := range data {
 		if i > 0 { // omit header line
-			var newUser warrant.User
+			var newUser warrant.UserParams
 			for j, field := range line {
 				if j == 0 {
 					newUser.UserId = strings.TrimSpace(field)
@@ -105,7 +106,7 @@ func importUsers(data [][]string, client warrant.WarrantClient) {
 					newUser.Email = strings.TrimSpace(field)
 				}
 			}
-			_, err := client.CreateUser(newUser)
+			_, err := user.Create(&newUser)
 			if err != nil {
 				usersFailed++
 				fmt.Printf("Error processing row %d: %s\n", i, err)

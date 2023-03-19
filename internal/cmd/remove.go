@@ -6,6 +6,9 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/warrant-dev/warrant-cli/internal/config"
 	"github.com/warrant-dev/warrant-cli/internal/reader"
+	"github.com/warrant-dev/warrant-go/v3/permission"
+	"github.com/warrant-dev/warrant-go/v3/role"
+	"github.com/warrant-dev/warrant-go/v3/user"
 )
 
 func init() {
@@ -29,18 +32,18 @@ warrant remove permission:perm2 role:admin`,
 		if err != nil {
 			return err
 		}
-		client, err := config.GetClient()
+		err = config.InitClient()
 		if err != nil {
 			return err
 		}
 		if subject.Type == "role" && object.Type == "user" {
-			err = client.RemoveRoleFromUser(object.Id, subject.Id)
+			err = role.RemoveRoleFromUser(subject.Id, object.Id)
 		} else if subject.Type == "permission" && object.Type == "user" {
-			err = client.RemovePermissionFromUser(object.Id, subject.Id)
+			err = permission.RemovePermissionFromUser(subject.Id, object.Id)
 		} else if subject.Type == "permission" && object.Type == "role" {
-			err = client.RemovePermissionFromRole(object.Id, subject.Id)
+			err = permission.RemovePermissionFromRole(subject.Id, object.Id)
 		} else if subject.Type == "user" && object.Type == "tenant" {
-			err = client.RemoveUserFromTenant(object.Id, subject.Id)
+			err = user.RemoveUserFromTenant(subject.Id, object.Id, "member")
 		} else {
 			return fmt.Errorf("Invalid remove request")
 		}

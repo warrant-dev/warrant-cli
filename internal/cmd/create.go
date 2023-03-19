@@ -5,7 +5,9 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/warrant-dev/warrant-cli/internal/config"
-	"github.com/warrant-dev/warrant-go"
+	"github.com/warrant-dev/warrant-go/v3"
+	"github.com/warrant-dev/warrant-go/v3/permission"
+	"github.com/warrant-dev/warrant-go/v3/role"
 )
 
 func init() {
@@ -30,7 +32,7 @@ warrant create permission new-perm`,
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		client, err := config.GetClient()
+		err := config.InitClient()
 		if err != nil {
 			return err
 		}
@@ -38,11 +40,11 @@ warrant create permission new-perm`,
 		entityId := args[1]
 		switch entityType {
 		case "role":
-			_, err = client.CreateRole(warrant.Role{
+			_, err = role.Create(&warrant.RoleParams{
 				RoleId: entityId,
 			})
 		case "permission":
-			_, err = client.CreatePermission(warrant.Permission{
+			_, err = permission.Create(&warrant.PermissionParams{
 				PermissionId: entityId,
 			})
 		default:
