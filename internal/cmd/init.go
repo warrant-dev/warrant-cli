@@ -28,7 +28,7 @@ var initCmd = &cobra.Command{
 warrant init`,
 	Args: cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Println("Warrant endpoint override (leave blank to use api.warrant.dev default):")
+		fmt.Println("Warrant endpoint override (leave blank to use https://api.warrant.dev default):")
 		fmt.Print("> ")
 		buf := bufio.NewReader(os.Stdin)
 		input, err := buf.ReadBytes('\n')
