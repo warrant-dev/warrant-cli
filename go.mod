@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/spf13/cobra v1.4.0
 	github.com/spf13/viper v1.11.0
-	github.com/warrant-dev/warrant-go/v3 v3.0.1
+	github.com/warrant-dev/warrant-go/v3 v3.1.0
 )
 
 require (
