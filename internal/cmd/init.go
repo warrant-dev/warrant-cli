@@ -16,28 +16,42 @@ func init() {
 }
 
 type ConfigFile struct {
-	Key string `json:"key"`
+	Key         string `json:"key"`
+	ApiEndpoint string `json:"apiEndpoint"`
 }
 
 var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Initialize the CLI for use",
-	Long:  "Initialize the CLI for use, including configuring the Warrant API key.",
+	Long:  "Initialize the CLI for use, including configuring server endpoint and API key.",
 	Example: `
 warrant init`,
 	Args: cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Println("Please navigate to https://app.warrant.dev/account in your browser, login and retrieve your API key (prod or test) and enter it here:")
+		fmt.Println("Warrant endpoint override (leave blank to use https://api.warrant.dev default):")
 		fmt.Print("> ")
 		buf := bufio.NewReader(os.Stdin)
 		input, err := buf.ReadBytes('\n')
 		if err != nil {
 			return err
 		}
-		fmt.Println("Creating ~/.warrant.json")
+		endpoint := strings.TrimSpace(string(input))
+		if endpoint == "" {
+			endpoint = "https://api.warrant.dev"
+		}
+		fmt.Println("API Key:")
+		fmt.Print("> ")
+		buf = bufio.NewReader(os.Stdin)
+		input, err = buf.ReadBytes('\n')
+		if err != nil {
+			return err
+		}
 		key := strings.TrimSpace(string(input))
+
+		fmt.Println("Creating ~/.warrant.json")
 		config := ConfigFile{
-			Key: key,
+			ApiEndpoint: endpoint,
+			Key:         key,
 		}
 		fileContents, err := json.MarshalIndent(config, "", "    ")
 		if err != nil {
