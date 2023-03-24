@@ -5,7 +5,9 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/warrant-dev/warrant-cli/internal/config"
+	"github.com/warrant-dev/warrant-go/v3/feature"
 	"github.com/warrant-dev/warrant-go/v3/permission"
+	"github.com/warrant-dev/warrant-go/v3/pricingtier"
 	"github.com/warrant-dev/warrant-go/v3/role"
 	"github.com/warrant-dev/warrant-go/v3/tenant"
 	"github.com/warrant-dev/warrant-go/v3/user"
@@ -16,24 +18,15 @@ func init() {
 }
 
 var deleteCmd = &cobra.Command{
-	Use:   "delete role|tenant|permission|user ID",
+	Use:   "delete [type] [id]",
 	Short: "Delete a resource given its type and id",
-	Long:  "Delete a resource by id, specifically a role, tenant, permission or user.",
+	Long:  "Delete a resource by id, specifically a user, tenant, role, permission, pricing-tier or feature.",
 	Example: `
 warrant delete role admin-1
 warrant delete tenant tenant-2
 warrant delete permission perm-1
 warrant delete user user-1`,
-	Args: func(cmd *cobra.Command, args []string) error {
-		if len(args) != 2 {
-			return fmt.Errorf("accepts 2 args, received %d", len(args))
-		}
-		entityType := args[0]
-		if entityType != "role" && entityType != "tenant" && entityType != "permission" && entityType != "user" {
-			return fmt.Errorf("entity to delete must be a role|tenant|permission|user")
-		}
-		return nil
-	},
+	Args: cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		err := config.InitClient()
 		if err != nil {
@@ -42,14 +35,18 @@ warrant delete user user-1`,
 		entityType := args[0]
 		entityId := args[1]
 		switch entityType {
-		case "role":
-			err = role.Delete(entityId)
-		case "tenant":
-			err = tenant.Delete(entityId)
-		case "permission":
-			err = permission.Delete(entityId)
 		case "user":
 			err = user.Delete(entityId)
+		case "tenant":
+			err = tenant.Delete(entityId)
+		case "role":
+			err = role.Delete(entityId)
+		case "permission":
+			err = permission.Delete(entityId)
+		case "pricing-tier":
+			err = pricingtier.Delete(entityId)
+		case "feature":
+			err = feature.Delete(entityId)
 		default:
 			return fmt.Errorf("Invalid delete request")
 		}
