@@ -5,7 +5,7 @@ import (
 	"github.com/warrant-dev/warrant-go/v3"
 )
 
-func InitClient() error {
+func Init() error {
 	warrant.ApiKey = viper.GetString("key")
 	endpoint := viper.GetString("apiEndpoint")
 	warrant.ApiEndpoint = endpoint

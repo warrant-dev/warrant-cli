@@ -14,15 +14,23 @@ func init() {
 }
 
 var checkCmd = &cobra.Command{
-	Use:   "check subject relation object",
-	Short: "Check if a given subject-relation-object warrant exists",
-	Long:  "Check a warrant for a user",
+	Use:   "check [type:id] [hasPermission|hasRole|hasFeature|relation] [id|type:id]",
+	Short: "Check if an object (specified as type:id) has a given permission, role, feature or relationship to another object",
+	Long: `
+Check if an object (specified as type:id) has a given permission, role, feature or relationship to another object. Supported checks include:
+
+warrant check user:id hasPermission perm1
+warrant check user:id hasRole admin
+warrant check user:id hasFeature feature1
+warrant check user:id member tenant:id`,
 	Example: `
-warrant check user:23 member role:admin
-warrant check role:admin editor document:45`,
+warrant check user:56 hasPermission view-dashboards
+warrant check user:45 hasRole admin
+warrant check user:1 hasFeature dashboard
+warrant check user:2 editor document:xyz`,
 	Args: cobra.ExactArgs(3),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		err := config.InitClient()
+		err := config.Init()
 		if err != nil {
 			return err
 		}
@@ -30,24 +38,46 @@ warrant check role:admin editor document:45`,
 		if err != nil {
 			return err
 		}
-		relation := args[1]
-		object, err := reader.ParseObject(args[2])
-		if err != nil {
-			return err
-		}
-		result, err := warrant.Check(&warrant.WarrantCheckParams{
-			WarrantCheck: warrant.WarrantCheck{
-				Object: warrant.Object{
-					ObjectType: object.Type,
-					ObjectId:   object.Id,
-				},
-				Relation: relation,
+		toCheck := args[1]
+
+		result := false
+		if toCheck == "hasPermission" && subject.Type == "user" {
+			result, err = warrant.CheckUserHasPermission(&warrant.PermissionCheckParams{
+				PermissionId: args[2],
+				UserId:       subject.Id,
+			})
+		} else if toCheck == "hasRole" && subject.Type == "user" {
+			result, err = warrant.CheckUserHasRole(&warrant.RoleCheckParams{
+				RoleId: args[2],
+				UserId: subject.Id,
+			})
+		} else if toCheck == "hasFeature" {
+			result, err = warrant.CheckHasFeature(&warrant.FeatureCheckParams{
+				FeatureId: args[2],
 				Subject: warrant.Subject{
 					ObjectType: subject.Type,
 					ObjectId:   subject.Id,
 				},
-			},
-		})
+			})
+		} else {
+			object, e := reader.ParseObject(args[2])
+			if e != nil {
+				return e
+			}
+			result, err = warrant.Check(&warrant.WarrantCheckParams{
+				WarrantCheck: warrant.WarrantCheck{
+					Object: warrant.Object{
+						ObjectType: object.Type,
+						ObjectId:   object.Id,
+					},
+					Relation: toCheck,
+					Subject: warrant.Subject{
+						ObjectType: subject.Type,
+						ObjectId:   subject.Id,
+					},
+				},
+			})
+		}
 		if err != nil {
 			return err
 		}

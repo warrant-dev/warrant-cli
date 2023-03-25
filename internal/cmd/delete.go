@@ -28,7 +28,7 @@ warrant delete permission perm-1
 warrant delete user user-1`,
 	Args: cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		err := config.InitClient()
+		err := config.Init()
 		if err != nil {
 			return err
 		}

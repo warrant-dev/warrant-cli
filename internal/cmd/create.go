@@ -27,7 +27,7 @@ warrant create role new-role
 warrant create permission new-perm`,
 	Args: cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		err := config.InitClient()
+		err := config.Init()
 		if err != nil {
 			return err
 		}
