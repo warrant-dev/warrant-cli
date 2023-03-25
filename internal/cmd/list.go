@@ -29,7 +29,7 @@ warrant list permissions`,
 	Args:      cobra.ExactValidArgs(1),
 	ValidArgs: []string{"users", "tenants", "roles", "permissions", "pricing-tiers", "features"},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		err := config.InitClient()
+		err := config.Init()
 		if err != nil {
 			return err
 		}

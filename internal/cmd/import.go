@@ -60,7 +60,7 @@ warrant import users users.csv
 		}
 
 		// Import from csv
-		err := config.InitClient()
+		err := config.Init()
 		if err != nil {
 			return err
 		}
