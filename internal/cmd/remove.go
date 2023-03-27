@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/warrant-dev/warrant-cli/internal/config"
 	"github.com/warrant-dev/warrant-cli/internal/reader"
+	"github.com/warrant-dev/warrant-go/v3"
 	"github.com/warrant-dev/warrant-go/v3/feature"
 	"github.com/warrant-dev/warrant-go/v3/permission"
 	"github.com/warrant-dev/warrant-go/v3/pricingtier"
@@ -30,48 +31,78 @@ warrant remove permission:id user:id
 warrant remove feature:id pricing-tier:id
 warrant remove feature:id user:id
 warrant remove pricing-tier:id tenant:id
-warrant remove pricing-tier:id user:id`,
+warrant remove pricing-tier:id user:id
+warrant remove subject:id relation object:id`,
 	Example: `
 warrant remove role:admin user:user2
-warrant remove permission:perm2 role:admin`,
-	Args: cobra.ExactArgs(2),
+warrant remove permission:perm2 role:admin
+warrant remove user:1 editor document:xyz`,
+	Args: cobra.RangeArgs(2, 3),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		object, err := reader.ParseObject(args[0])
-		if err != nil {
-			return err
-		}
-		removeFrom, err := reader.ParseObject(args[1])
-		if err != nil {
-			return err
-		}
-		err = config.Init()
+		err := config.Init()
 		if err != nil {
 			return err
 		}
 
-		if object.Type == "user" && removeFrom.Type == "tenant" {
-			err = user.RemoveUserFromTenant(object.Id, removeFrom.Id, "member")
-		} else if object.Type == "role" && removeFrom.Type == "user" {
-			err = role.RemoveRoleFromUser(object.Id, removeFrom.Id)
-		} else if object.Type == "permission" && removeFrom.Type == "role" {
-			err = permission.RemovePermissionFromRole(object.Id, removeFrom.Id)
-		} else if object.Type == "permission" && removeFrom.Type == "user" {
-			err = permission.RemovePermissionFromUser(object.Id, removeFrom.Id)
-		} else if object.Type == "feature" && removeFrom.Type == "pricing-tier" {
-			err = feature.RemoveFeatureFromPricingTier(object.Id, removeFrom.Id)
-		} else if object.Type == "feature" && removeFrom.Type == "user" {
-			err = feature.RemoveFeatureFromUser(object.Id, removeFrom.Id)
-		} else if object.Type == "pricing-tier" && removeFrom.Type == "tenant" {
-			err = pricingtier.RemovePricingTierFromTenant(object.Id, removeFrom.Id)
-		} else if object.Type == "pricing-tier" && removeFrom.Type == "user" {
-			err = pricingtier.RemovePricingTierFromUser(object.Id, removeFrom.Id)
+		if len(args) == 3 {
+			// Delete warrant (subject, relation, object)
+			subject, err := reader.ParseObject(args[0])
+			if err != nil {
+				return err
+			}
+			relation := args[1]
+			object, err := reader.ParseObject(args[2])
+			if err != nil {
+				return err
+			}
+			err = warrant.Delete(&warrant.WarrantParams{
+				ObjectType: object.Type,
+				ObjectId:   object.Id,
+				Relation:   relation,
+				Subject: warrant.Subject{
+					ObjectType: subject.Type,
+					ObjectId:   subject.Id,
+				},
+			})
+			if err != nil {
+				return err
+			}
+			fmt.Printf("Deleted warrant %s:%s %s %s:%s\n", subject.Type, subject.Id, relation, object.Type, object.Id)
 		} else {
-			return fmt.Errorf("Invalid remove request")
+			// Remove built-in type associations
+			object, err := reader.ParseObject(args[0])
+			if err != nil {
+				return err
+			}
+			removeFrom, err := reader.ParseObject(args[1])
+			if err != nil {
+				return err
+			}
+
+			if object.Type == "user" && removeFrom.Type == "tenant" {
+				err = user.RemoveUserFromTenant(object.Id, removeFrom.Id, "member")
+			} else if object.Type == "role" && removeFrom.Type == "user" {
+				err = role.RemoveRoleFromUser(object.Id, removeFrom.Id)
+			} else if object.Type == "permission" && removeFrom.Type == "role" {
+				err = permission.RemovePermissionFromRole(object.Id, removeFrom.Id)
+			} else if object.Type == "permission" && removeFrom.Type == "user" {
+				err = permission.RemovePermissionFromUser(object.Id, removeFrom.Id)
+			} else if object.Type == "feature" && removeFrom.Type == "pricing-tier" {
+				err = feature.RemoveFeatureFromPricingTier(object.Id, removeFrom.Id)
+			} else if object.Type == "feature" && removeFrom.Type == "user" {
+				err = feature.RemoveFeatureFromUser(object.Id, removeFrom.Id)
+			} else if object.Type == "pricing-tier" && removeFrom.Type == "tenant" {
+				err = pricingtier.RemovePricingTierFromTenant(object.Id, removeFrom.Id)
+			} else if object.Type == "pricing-tier" && removeFrom.Type == "user" {
+				err = pricingtier.RemovePricingTierFromUser(object.Id, removeFrom.Id)
+			} else {
+				return fmt.Errorf("Invalid remove request")
+			}
+			if err != nil {
+				return err
+			}
+			fmt.Printf("Removed %s:%s from %s:%s\n", object.Type, object.Id, removeFrom.Type, removeFrom.Id)
 		}
-		if err != nil {
-			return err
-		}
-		fmt.Printf("Removed %s:%s from %s:%s\n", object.Type, object.Id, removeFrom.Type, removeFrom.Id)
 		return nil
 	},
 }
