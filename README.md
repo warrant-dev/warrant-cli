@@ -8,8 +8,14 @@ Interact with [Warrant](https://warrant.dev/) on your command line.
 
 ### macOS (Using Homebrew)
 
+#### Install:
 ```bash
 brew install warrant-dev/warrant/warrant
+```
+
+#### Upgrade:
+```bash
+brew upgrade warrant-dev/warrant/warrant
 ```
 
 ### Binaries
