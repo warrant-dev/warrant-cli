@@ -34,7 +34,7 @@ brews:
   -
     name: warrant
     homepage: "https://warrant.dev"
-    tap:
+    repository:
       owner: warrant-dev
       name: homebrew-warrant
     commit_author:
