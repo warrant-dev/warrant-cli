@@ -18,7 +18,6 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -75,7 +74,7 @@ warrant init`,
 		if err != nil {
 			return err
 		}
-		err = ioutil.WriteFile(homeDir+"/.warrant.json", fileContents, 0644)
+		err = os.WriteFile(homeDir+"/.warrant.json", fileContents, 0644)
 		if err != nil {
 			return err
 		}

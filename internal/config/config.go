@@ -16,7 +16,7 @@ package config
 
 import (
 	"github.com/spf13/viper"
-	"github.com/warrant-dev/warrant-go/v3"
+	"github.com/warrant-dev/warrant-go/v5"
 )
 
 func Init() error {

@@ -23,8 +23,8 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/warrant-dev/warrant-cli/internal/config"
-	"github.com/warrant-dev/warrant-go/v3"
-	"github.com/warrant-dev/warrant-go/v3/user"
+	"github.com/warrant-dev/warrant-go/v5"
+	"github.com/warrant-dev/warrant-go/v5/user"
 )
 
 func init() {

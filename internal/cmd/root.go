@@ -15,15 +15,12 @@
 package cmd
 
 import (
-	"io/ioutil"
 	"os"
 
 	"github.com/spf13/cobra"
 
 	"github.com/spf13/viper"
 )
-
-var cfgFile string
 
 var rootCmd = &cobra.Command{
 	Use:   "warrant",
@@ -56,7 +53,7 @@ func initConfig() {
 	_, err = os.Stat(home + "/.warrant.json")
 	if os.IsNotExist(err) {
 		emptyJson := []byte("{}")
-		err = ioutil.WriteFile(home+"/.warrant.json", emptyJson, 0644)
+		err = os.WriteFile(home+"/.warrant.json", emptyJson, 0644)
 		if err != nil {
 			cobra.CheckErr(err)
 		}
