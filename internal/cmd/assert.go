@@ -34,7 +34,7 @@ var assertCmd = &cobra.Command{
 	Long: `
 Assert whether a given check with subject (specified as 'type:id') has a 'relation' with an object (also specified as 'type:id'). Checks can also include an optional context for policy evaluation. Example assertions:
 
-warrant assert true user:56 member role:admin # returns true if check passes 
+warrant assert true user:56 member role:admin # returns true if check passes
 warrant assert false user:2 editor document:xyz # returns true if check does not pass
 warrant assert true user:56 member tenant:x '{"clientIp": "192.168.0.1"}' # returns true if check passes`,
 	Example: `

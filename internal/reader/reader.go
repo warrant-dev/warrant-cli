@@ -23,8 +23,9 @@ import (
 )
 
 type Object struct {
-	Type string
-	Id   string
+	Type     string
+	Id       string
+	Relation string
 }
 
 func ParseObject(arg string) (Object, error) {
@@ -32,10 +33,19 @@ func ParseObject(arg string) (Object, error) {
 	if len(arr) != 2 {
 		return Object{}, fmt.Errorf("Invalid object provided")
 	}
-	return Object{
-		Type: arr[0],
-		Id:   arr[1],
-	}, nil
+	idAndRelation := strings.Split(arr[1], "#")
+	if len(idAndRelation) == 2 {
+		return Object{
+			Type:     arr[0],
+			Id:       idAndRelation[0],
+			Relation: idAndRelation[1],
+		}, nil
+	} else {
+		return Object{
+			Type: arr[0],
+			Id:   arr[1],
+		}, nil
+	}
 }
 
 func ReadCheckArgs(args []string) (*warrant.WarrantCheckParams, error) {
@@ -65,8 +75,38 @@ func ReadCheckArgs(args []string) (*warrant.WarrantCheckParams, error) {
 			Subject: warrant.Subject{
 				ObjectType: subject.Type,
 				ObjectId:   subject.Id,
+				Relation:   subject.Relation,
 			},
 			Context: context,
 		},
+	}, nil
+}
+
+func ReadWarrantArgs(args []string) (*warrant.WarrantParams, error) {
+	subject, err := ParseObject(args[0])
+	if err != nil {
+		return nil, err
+	}
+	relation := args[1]
+	object, err := ParseObject(args[2])
+	if err != nil {
+		return nil, err
+	}
+
+	var policy string
+	if len(args) == 4 {
+		policy = args[3]
+	}
+
+	return &warrant.WarrantParams{
+		ObjectType: object.Type,
+		ObjectId:   object.Id,
+		Relation:   relation,
+		Subject: warrant.Subject{
+			ObjectType: subject.Type,
+			ObjectId:   subject.Id,
+			Relation:   subject.Relation,
+		},
+		Policy: policy,
 	}, nil
 }
