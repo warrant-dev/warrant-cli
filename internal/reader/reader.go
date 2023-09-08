@@ -15,8 +15,11 @@
 package reader
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
+
+	"github.com/warrant-dev/warrant-go/v5"
 )
 
 type Object struct {
@@ -32,5 +35,38 @@ func ParseObject(arg string) (Object, error) {
 	return Object{
 		Type: arr[0],
 		Id:   arr[1],
+	}, nil
+}
+
+func ReadCheckArgs(args []string) (*warrant.WarrantCheckParams, error) {
+	subject, err := ParseObject(args[0])
+	if err != nil {
+		return nil, err
+	}
+	relation := args[1]
+	object, err := ParseObject(args[2])
+	if err != nil {
+		return nil, err
+	}
+
+	var context warrant.PolicyContext
+	if len(args) == 4 {
+		contextStr := args[3]
+		json.Unmarshal([]byte(contextStr), &context)
+	}
+
+	return &warrant.WarrantCheckParams{
+		WarrantCheck: warrant.WarrantCheck{
+			Object: warrant.Object{
+				ObjectType: object.Type,
+				ObjectId:   object.Id,
+			},
+			Relation: relation,
+			Subject: warrant.Subject{
+				ObjectType: subject.Type,
+				ObjectId:   subject.Id,
+			},
+			Context: context,
+		},
 	}, nil
 }
