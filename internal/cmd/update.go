@@ -15,43 +15,38 @@
 package cmd
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/spf13/cobra"
 	"github.com/warrant-dev/warrant-cli/internal/config"
+	"github.com/warrant-dev/warrant-cli/internal/reader"
 )
 
 func init() {
-	rootCmd.AddCommand(createCmd)
+	rootCmd.AddCommand(updateCmd)
 }
 
-var createCmd = &cobra.Command{
-	Use:   "create [type] [id]",
-	Short: "Create a new resource given its type and desired id",
-	Long:  "Create a new resource by type and id, specifically a user, tenant, role, permission, pricing-tier or feature.",
+var updateCmd = &cobra.Command{
+	Use:   "update [type] [id]",
+	Short: "Delete a resource given its type and id",
+	Long:  "Delete a resource by id, specifically a user, tenant, role, permission, pricing-tier or feature.",
 	Example: `
-warrant create role new-role
-warrant create permission new-perm`,
-	Args: cobra.ExactArgs(2),
+warrant delete role admin-1
+warrant delete tenant tenant-2
+warrant delete permission perm-1
+warrant delete user user-1`,
+	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		err := config.Init()
 		if err != nil {
 			return err
 		}
 
-		entityParts := strings.Split(args[0], ":")
-		if len(entityParts) > 2 {
-			return fmt.Errorf("Invalid object")
+		_, err = reader.ParseObject(args[0])
+		if err != nil {
+			return err
 		}
 
-		if len(args) == 2 {
-			// TODO: Parse metadata
-		}
-
-		// TODO: create object
-
-		//fmt.Printf("Created %s:%s\n", entityType, entityId)
+		// TODO: get object by id
+		//fmt.Printf("Deleted %s:%s\n", entityType, entityId)
 		return nil
 	},
 }

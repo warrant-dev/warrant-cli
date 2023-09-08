@@ -15,16 +15,9 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 	"github.com/warrant-dev/warrant-cli/internal/config"
-	"github.com/warrant-dev/warrant-go/v5/feature"
-	"github.com/warrant-dev/warrant-go/v5/permission"
-	"github.com/warrant-dev/warrant-go/v5/pricingtier"
-	"github.com/warrant-dev/warrant-go/v5/role"
-	"github.com/warrant-dev/warrant-go/v5/tenant"
-	"github.com/warrant-dev/warrant-go/v5/user"
+	"github.com/warrant-dev/warrant-cli/internal/reader"
 )
 
 func init() {
@@ -40,34 +33,20 @@ warrant delete role admin-1
 warrant delete tenant tenant-2
 warrant delete permission perm-1
 warrant delete user user-1`,
-	Args: cobra.ExactArgs(2),
+	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		err := config.Init()
 		if err != nil {
 			return err
 		}
-		entityType := args[0]
-		entityId := args[1]
-		switch entityType {
-		case "user":
-			err = user.Delete(entityId)
-		case "tenant":
-			err = tenant.Delete(entityId)
-		case "role":
-			err = role.Delete(entityId)
-		case "permission":
-			err = permission.Delete(entityId)
-		case "pricing-tier":
-			err = pricingtier.Delete(entityId)
-		case "feature":
-			err = feature.Delete(entityId)
-		default:
-			return fmt.Errorf("Invalid delete request")
-		}
+
+		_, err = reader.ParseObject(args[0])
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Deleted %s:%s\n", entityType, entityId)
+
+		// TODO: delete object
+		//fmt.Printf("Deleted %s:%s\n", entityType, entityId)
 		return nil
 	},
 }
