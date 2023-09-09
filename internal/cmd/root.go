@@ -15,23 +15,13 @@
 package cmd
 
 import (
-	"os"
-	"runtime"
-
 	"github.com/spf13/cobra"
-
-	"github.com/spf13/viper"
+	"github.com/warrant-dev/warrant-cli/internal/config"
+	"github.com/warrant-dev/warrant-cli/internal/printer"
+	"github.com/warrant-dev/warrant-go/v4"
 )
 
-var Reset = "\033[0m"
-var Red = "\033[31m"
-var Green = "\033[32m"
-var Yellow = "\033[33m"
-var Blue = "\033[34m"
-var Purple = "\033[35m"
-var Cyan = "\033[36m"
-var Gray = "\033[37m"
-var White = "\033[97m"
+var cmdConfig *config.Config
 
 var rootCmd = &cobra.Command{
 	Use:   "warrant",
@@ -40,53 +30,34 @@ var rootCmd = &cobra.Command{
 }
 
 func Execute() {
-	// Execute requested cmd and handle any errors
 	cobra.CheckErr(rootCmd.Execute())
 }
 
 func init() {
-	if runtime.GOOS == "windows" {
-		Reset = ""
-		Red = ""
-		Green = ""
-		Yellow = ""
-		Blue = ""
-		Purple = ""
-		Cyan = ""
-		Gray = ""
-		White = ""
-	}
-
 	cobra.OnInitialize(initConfig)
 
-	// Flags (including persistent) definition
 	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.warrant.json)")
-	// Declare and bind API key via config
-	// rootCmd.PersistentFlags().StringP("key", "k", "", "Warrant API key")
-	// viper.BindPFlag("key", rootCmd.PersistentFlags().Lookup("key"))
-
-	// Cobra also supports local flags, which will only run when this action is called directly.
+	// rootCmd.PersistentFlags().StringVarP(&EnvName, "env", "e", "", "environment")
+	// viper.BindPFlag("env", rootCmd.PersistentFlags().Lookup("env"))
 	// rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
 func initConfig() {
-	// Look for .warrant.json in HOME dir and create an empty version if it doesn't exist
-	home, err := os.UserHomeDir()
-	cobra.CheckErr(err)
-	_, err = os.Stat(home + "/.warrant.json")
-	if os.IsNotExist(err) {
-		emptyJson := []byte("{}")
-		err = os.WriteFile(home+"/.warrant.json", emptyJson, 0644)
-		if err != nil {
-			cobra.CheckErr(err)
-		}
-	}
+	cmdConfig = config.LoadConfig()
+	warrant.ApiKey = cmdConfig.Environments[cmdConfig.ActiveEnvironment].ApiKey
+	warrant.ApiEndpoint = cmdConfig.Environments[cmdConfig.ActiveEnvironment].ApiEndpoint
+	warrant.AuthorizeEndpoint = cmdConfig.Environments[cmdConfig.ActiveEnvironment].ApiEndpoint
+}
 
-	// Load config from ~/.warrant.json
-	viper.AddConfigPath(home)
-	viper.SetConfigType("json")
-	viper.SetConfigName(".warrant")
-	viper.AutomaticEnv() // read in environment variables that match
-	err = viper.ReadInConfig()
-	cobra.CheckErr(err)
+func GetConfigOrExit() *config.Config {
+	if cmdConfig.ActiveEnvironment == "" {
+		printer.PrintErrAndExit("no active environment configured. Run 'warrant init'")
+	}
+	if len(cmdConfig.Environments) == 0 {
+		printer.PrintErrAndExit("no environments configured. Run 'warrant init'")
+	}
+	if _, ok := cmdConfig.Environments[cmdConfig.ActiveEnvironment]; !ok {
+		printer.PrintErrAndExit("invalid active environment configured. Run 'warrant init'")
+	}
+	return cmdConfig
 }

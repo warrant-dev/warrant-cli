@@ -15,12 +15,9 @@
 package cmd
 
 import (
-	"encoding/json"
-	"fmt"
-
 	"github.com/spf13/cobra"
-	"github.com/warrant-dev/warrant-cli/internal/config"
-	"github.com/warrant-dev/warrant-go/v5"
+	"github.com/warrant-dev/warrant-cli/internal/printer"
+	"github.com/warrant-dev/warrant-go/v4"
 )
 
 func init() {
@@ -28,32 +25,21 @@ func init() {
 }
 
 var queryCmd = &cobra.Command{
-	Use:   "query [queryString]",
-	Short: "Run provided Warrant query",
-	Long: `
-Run provided Warrant query. Examples:
-
-warrant query 'select explicit *'`,
+	Use:   "query <queryString>",
+	Short: "Run a provided Warrant query",
+	Long:  "Run a provided Warrant query.",
 	Example: `
 warrant query 'select explicit *'`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		err := config.Init()
-		if err != nil {
-			return err
-		}
+		GetConfigOrExit()
 
-		// TODO: Support --limit=100 --sort=createdAt --afterId=1 --beforeId=45 --afterValue=sdf --beforeValue=sdf --sortBy=sdf --sortOrder=dfsdf --limit=50 --warrantToken
 		result, err := warrant.Query(args[0], &warrant.ListWarrantParams{})
 		if err != nil {
 			return err
 		}
 
-		jsonQueryResult, err := json.Marshal(result)
-		if err != nil {
-			return err
-		}
-		fmt.Printf("%s\n", string(jsonQueryResult))
+		printer.PrintJson(result)
 
 		return nil
 	},

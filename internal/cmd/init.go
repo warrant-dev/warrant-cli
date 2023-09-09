@@ -15,70 +15,43 @@
 package cmd
 
 import (
-	"bufio"
-	"encoding/json"
 	"fmt"
-	"os"
-	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/warrant-dev/warrant-cli/internal/config"
+	"github.com/warrant-dev/warrant-cli/internal/reader"
 )
 
 func init() {
 	rootCmd.AddCommand(initCmd)
 }
 
-type ConfigFile struct {
-	Key         string `json:"key"`
-	ApiEndpoint string `json:"apiEndpoint"`
-}
-
 var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Initialize the CLI for use",
-	Long:  "Initialize the CLI for use, including configuring server endpoint and API key.",
+	Long:  "Initialize the CLI for use, including configuring an environment and API key.",
 	Example: `
 warrant init`,
 	Args: cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Println("Warrant endpoint override (leave blank to use https://api.warrant.dev default):")
-		fmt.Print("> ")
-		buf := bufio.NewReader(os.Stdin)
-		input, err := buf.ReadBytes('\n')
+		envName, env, err := reader.ReadEnvFromConsole()
 		if err != nil {
 			return err
 		}
-		endpoint := strings.TrimSpace(string(input))
-		if endpoint == "" {
-			endpoint = "https://api.warrant.dev"
-		}
-		fmt.Println("API Key:")
-		fmt.Print("> ")
-		buf = bufio.NewReader(os.Stdin)
-		input, err = buf.ReadBytes('\n')
-		if err != nil {
-			return err
-		}
-		key := strings.TrimSpace(string(input))
 
 		fmt.Println("Creating ~/.warrant.json")
-		config := ConfigFile{
-			ApiEndpoint: endpoint,
-			Key:         key,
+		envMap := make(map[string]config.Environment)
+		envMap[envName] = *env
+		newConfig := config.Config{
+			ActiveEnvironment: envName,
+			Environments:      envMap,
 		}
-		fileContents, err := json.MarshalIndent(config, "", "    ")
+		err = newConfig.Write()
 		if err != nil {
 			return err
 		}
-		homeDir, err := os.UserHomeDir()
-		if err != nil {
-			return err
-		}
-		err = os.WriteFile(homeDir+"/.warrant.json", fileContents, 0644)
-		if err != nil {
-			return err
-		}
-		fmt.Println("Setup complete.")
+		fmt.Println("Setup complete")
+
 		return nil
 	},
 }

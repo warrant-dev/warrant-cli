@@ -15,46 +15,61 @@
 package reader
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 
-	"github.com/warrant-dev/warrant-go/v5"
+	"github.com/warrant-dev/warrant-cli/internal/config"
+	"github.com/warrant-dev/warrant-go/v4"
 )
 
-type Object struct {
-	Type     string
-	Id       string
-	Relation string
+func ReadObjectArg(arg string) (string, string, error) {
+	if strings.Contains(arg, "#") {
+		return "", "", fmt.Errorf("invalid object: cannot contain '#'")
+	}
+	typeAndId := strings.Split(arg, ":")
+	if len(typeAndId) == 1 {
+		return typeAndId[0], "", nil
+	}
+	if len(typeAndId) == 2 {
+		return typeAndId[0], typeAndId[1], nil
+	}
+	return "", "", fmt.Errorf("invalid object")
 }
 
-func ParseObject(arg string) (Object, error) {
-	arr := strings.Split(arg, ":")
-	if len(arr) != 2 {
-		return Object{}, fmt.Errorf("Invalid object provided")
+func ReadObjectMetaArg(arg string) (map[string]interface{}, error) {
+	var meta map[string]interface{}
+	err := json.Unmarshal([]byte(arg), &meta)
+	if err != nil {
+		return meta, err
 	}
-	idAndRelation := strings.Split(arr[1], "#")
-	if len(idAndRelation) == 2 {
-		return Object{
-			Type:     arr[0],
-			Id:       idAndRelation[0],
-			Relation: idAndRelation[1],
-		}, nil
-	} else {
-		return Object{
-			Type: arr[0],
-			Id:   arr[1],
-		}, nil
+	return meta, nil
+}
+
+func ReadSubjectArg(arg string) (string, string, string, error) {
+	objAndRelation := strings.Split(arg, "#")
+	objType, id, err := ReadObjectArg(objAndRelation[0])
+	if len(objAndRelation) == 1 {
+		return objType, id, "", err
 	}
+	if len(objAndRelation) == 2 {
+		return objType, id, objAndRelation[1], err
+	}
+	return "", "", "", fmt.Errorf("invalid subject")
 }
 
 func ReadCheckArgs(args []string) (*warrant.WarrantCheckParams, error) {
-	subject, err := ParseObject(args[0])
+	if len(args) < 3 || len(args) > 4 {
+		return nil, fmt.Errorf("invalid check: %s", args)
+	}
+	subjectType, subjectId, subjectRelation, err := ReadSubjectArg(args[0])
 	if err != nil {
 		return nil, err
 	}
 	relation := args[1]
-	object, err := ParseObject(args[2])
+	objectType, objectId, err := ReadObjectArg(args[2])
 	if err != nil {
 		return nil, err
 	}
@@ -68,14 +83,14 @@ func ReadCheckArgs(args []string) (*warrant.WarrantCheckParams, error) {
 	return &warrant.WarrantCheckParams{
 		WarrantCheck: warrant.WarrantCheck{
 			Object: warrant.Object{
-				ObjectType: object.Type,
-				ObjectId:   object.Id,
+				ObjectType: objectType,
+				ObjectId:   objectId,
 			},
 			Relation: relation,
 			Subject: warrant.Subject{
-				ObjectType: subject.Type,
-				ObjectId:   subject.Id,
-				Relation:   subject.Relation,
+				ObjectType: subjectType,
+				ObjectId:   subjectId,
+				Relation:   subjectRelation,
 			},
 			Context: context,
 		},
@@ -83,12 +98,15 @@ func ReadCheckArgs(args []string) (*warrant.WarrantCheckParams, error) {
 }
 
 func ReadWarrantArgs(args []string) (*warrant.WarrantParams, error) {
-	subject, err := ParseObject(args[0])
+	if len(args) < 3 || len(args) > 4 {
+		return nil, fmt.Errorf("invalid warrant: %s", args)
+	}
+	subjectType, subjectId, subjectRelation, err := ReadSubjectArg(args[0])
 	if err != nil {
 		return nil, err
 	}
 	relation := args[1]
-	object, err := ParseObject(args[2])
+	objectType, objectId, err := ReadObjectArg(args[2])
 	if err != nil {
 		return nil, err
 	}
@@ -99,14 +117,49 @@ func ReadWarrantArgs(args []string) (*warrant.WarrantParams, error) {
 	}
 
 	return &warrant.WarrantParams{
-		ObjectType: object.Type,
-		ObjectId:   object.Id,
+		ObjectType: objectType,
+		ObjectId:   objectId,
 		Relation:   relation,
 		Subject: warrant.Subject{
-			ObjectType: subject.Type,
-			ObjectId:   subject.Id,
-			Relation:   subject.Relation,
+			ObjectType: subjectType,
+			ObjectId:   subjectId,
+			Relation:   subjectRelation,
 		},
 		Policy: policy,
+	}, nil
+}
+
+func PromptAndReadFromStdIn(prompt string) (string, error) {
+	fmt.Println(prompt + ":")
+	buf := bufio.NewReader(os.Stdin)
+	input, err := buf.ReadBytes('\n')
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(string(input)), nil
+}
+
+func ReadEnvFromConsole() (string, *config.Environment, error) {
+	envName, err := PromptAndReadFromStdIn("Enter environment name")
+	if err != nil {
+		return "", nil, err
+	}
+
+	apiKey, err := PromptAndReadFromStdIn("Enter API key")
+	if err != nil {
+		return "", nil, err
+	}
+
+	apiEndpoint, err := PromptAndReadFromStdIn("Warrant endpoint override (leave blank to use default https://api.warrant.dev)")
+	if err != nil {
+		return "", nil, err
+	}
+	if apiEndpoint == "" {
+		apiEndpoint = "https://api.warrant.dev"
+	}
+
+	return envName, &config.Environment{
+		ApiKey:      apiKey,
+		ApiEndpoint: apiEndpoint,
 	}, nil
 }

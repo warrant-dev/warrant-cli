@@ -22,9 +22,8 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/warrant-dev/warrant-cli/internal/config"
-	"github.com/warrant-dev/warrant-go/v5"
-	"github.com/warrant-dev/warrant-go/v5/user"
+	"github.com/warrant-dev/warrant-go/v4"
+	"github.com/warrant-dev/warrant-go/v4/user"
 )
 
 func init() {
@@ -50,6 +49,8 @@ warrant import users file.csv`,
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
+		GetConfigOrExit()
+
 		// Return info if run with no args
 		if len(args) == 0 {
 			fmt.Printf(`
@@ -74,10 +75,6 @@ warrant import users users.csv
 		}
 
 		// Import from csv
-		err := config.Init()
-		if err != nil {
-			return err
-		}
 		entityType := args[0]
 		fileName := args[1]
 
