@@ -17,6 +17,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/muesli/termenv"
 	"github.com/spf13/cobra"
 	"github.com/warrant-dev/warrant-cli/internal/printer"
 	"github.com/warrant-dev/warrant-cli/internal/reader"
@@ -56,7 +57,7 @@ warrant list`,
 		config := GetConfigOrExit()
 		for env := range config.Environments {
 			if env == config.ActiveEnvironment {
-				fmt.Println("* " + env)
+				fmt.Println(termenv.String("* " + env).Bold().Foreground(printer.Purple))
 			} else {
 				fmt.Println("  " + env)
 			}

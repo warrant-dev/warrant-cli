@@ -20,8 +20,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/warrant-dev/warrant-cli/internal/printer"
 	"github.com/warrant-dev/warrant-cli/internal/reader"
-	"github.com/warrant-dev/warrant-go/v4"
-	"github.com/warrant-dev/warrant-go/v4/object"
+	"github.com/warrant-dev/warrant-go/v5"
+	"github.com/warrant-dev/warrant-go/v5/object"
 )
 
 func init() {
@@ -85,7 +85,7 @@ warrant get role:123`,
 			return err
 		}
 
-		obj, err := object.Get(objectType, objectId)
+		obj, err := object.Get(objectType, objectId, &warrant.ObjectParams{})
 		if err != nil {
 			return err
 		}
@@ -115,7 +115,9 @@ warrant update role:123 '{"name": "New name"}'`,
 			return err
 		}
 
-		updatedObj, err := object.Update(objectType, objectId, meta)
+		updatedObj, err := object.Update(objectType, objectId, &warrant.ObjectParams{
+			Meta: meta,
+		})
 		if err != nil {
 			return err
 		}

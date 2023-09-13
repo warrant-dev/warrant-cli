@@ -22,7 +22,7 @@ import (
 	"strings"
 
 	"github.com/warrant-dev/warrant-cli/internal/config"
-	"github.com/warrant-dev/warrant-go/v4"
+	"github.com/warrant-dev/warrant-go/v5"
 )
 
 func ReadObjectArg(arg string) (string, string, error) {

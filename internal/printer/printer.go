@@ -18,7 +18,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+
+	"github.com/muesli/termenv"
 )
+
+var Purple = termenv.ColorProfile().Color("#6310FF")
+var Red = termenv.ColorProfile().Color("#FF0000")
+var Green = termenv.ColorProfile().Color("#00FF00")
 
 func PrintJson(val any) {
 	bytes, err := json.MarshalIndent(val, "", "    ")

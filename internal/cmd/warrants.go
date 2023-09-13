@@ -18,9 +18,11 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/muesli/termenv"
 	"github.com/spf13/cobra"
+	"github.com/warrant-dev/warrant-cli/internal/printer"
 	"github.com/warrant-dev/warrant-cli/internal/reader"
-	"github.com/warrant-dev/warrant-go/v4"
+	"github.com/warrant-dev/warrant-go/v5"
 )
 
 func init() {
@@ -51,7 +53,13 @@ warrant check user:56 member tenant:x '{"clientIp": "192.168.0.1"}'`,
 		if err != nil {
 			return err
 		}
-		fmt.Printf("%t\n", result)
+
+		s := termenv.String(strconv.FormatBool(result))
+		if result {
+			fmt.Println(s.Foreground(printer.Green))
+		} else {
+			fmt.Println(s.Foreground(printer.Red))
+		}
 
 		return nil
 	},
@@ -85,9 +93,9 @@ warrant assert true user:56 member tenant:x '{"clientIp": "192.168.0.1"}'`,
 		}
 
 		if result == expected {
-			fmt.Printf("%t\n", true)
+			fmt.Println(termenv.String("true").Foreground(printer.Green))
 		} else {
-			fmt.Printf("%t\n", false)
+			fmt.Println(termenv.String("false").Foreground(printer.Red))
 		}
 
 		return nil
@@ -110,11 +118,11 @@ warrant assign user:56 member role:admin 'domain == warrant.dev'`,
 			return err
 		}
 
-		newWarrant, err := warrant.Create(warrantSpec)
+		_, err = warrant.Create(warrantSpec)
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Created warrant %s:%s %s %s:%s\n", newWarrant.ObjectType, newWarrant.ObjectId, newWarrant.Relation, newWarrant.Subject.ObjectType, newWarrant.Subject.ObjectId)
+		fmt.Println("Created warrant")
 
 		return nil
 	},
@@ -140,7 +148,7 @@ warrant remove user:56 member role:admin 'domain == warrant.dev'`,
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Deleted warrant\n")
+		fmt.Println("Deleted warrant")
 
 		return nil
 	},
