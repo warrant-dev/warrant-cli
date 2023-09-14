@@ -25,10 +25,22 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(createCmd)
-	rootCmd.AddCommand(getCmd)
-	rootCmd.AddCommand(updateCmd)
-	rootCmd.AddCommand(deleteCmd)
+	objectCmd.AddCommand(createCmd)
+	objectCmd.AddCommand(getCmd)
+	objectCmd.AddCommand(updateCmd)
+	objectCmd.AddCommand(deleteCmd)
+	rootCmd.AddCommand(objectCmd)
+}
+
+var objectCmd = &cobra.Command{
+	Use:   "object",
+	Short: "Operate on objects (get, create, update, delete)",
+	Long:  "Operate on objects (get, create, update, delete), including their metadata.",
+	Example: `
+warrant object create role:admin
+warrant object get role:admin
+warrant object update role:admin '{"name": "New name"}'
+warrant object delete role:admin`,
 }
 
 var createCmd = &cobra.Command{
@@ -36,9 +48,9 @@ var createCmd = &cobra.Command{
 	Short: "Create a new object of specified type with optional id and optional meta",
 	Long:  "Create a new object of specified type with optional id and optional meta. If an id is provided (e.g. 'role:123'), it will be assigned to the newly created object. The optional 'meta' is provided as a json string and will be attached to the newly created object.",
 	Example: `
-warrant create role
-warrant create user:123
-warrant create permission:edit-users '{"name": "Edit Users"}'`,
+warrant object create role
+warrant object create user:123
+warrant object create permission:edit-users '{"name": "Edit Users"}'`,
 	Args: cobra.RangeArgs(1, 2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		GetConfigOrExit()
@@ -75,7 +87,7 @@ var getCmd = &cobra.Command{
 	Short: "Get an object specified by type:id",
 	Long:  "Get an object specified by type:id. Also returns the object's 'meta', if present.",
 	Example: `
-warrant get role:123`,
+warrant object get role:123`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		GetConfigOrExit()
@@ -100,7 +112,7 @@ var updateCmd = &cobra.Command{
 	Short: "Update an object's (specified as type:id) meta",
 	Long:  "Update an object's (specified as type:id) meta. Object 'meta' must be passed as a json string. Note that an object's existing id cannot be updated.",
 	Example: `
-warrant update role:123 '{"name": "New name"}'`,
+warrant object update role:123 '{"name": "New name"}'`,
 	Args: cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		GetConfigOrExit()
@@ -132,7 +144,7 @@ var deleteCmd = &cobra.Command{
 	Short: "Delete the object with specified type:id",
 	Long:  "Delete the object with specified type:id. The entire object, including its 'meta', will be deleted.",
 	Example: `
-warrant delete role:admin`,
+warrant object delete role:admin`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		GetConfigOrExit()
