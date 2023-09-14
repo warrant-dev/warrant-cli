@@ -6,7 +6,7 @@ require (
 	github.com/muesli/termenv v0.15.2
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.16.0
-	github.com/warrant-dev/warrant-go/v5 v5.0.0
+	github.com/warrant-dev/warrant-go/v5 v5.1.0
 )
 
 require (
