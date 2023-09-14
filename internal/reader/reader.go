@@ -25,12 +25,15 @@ import (
 	"github.com/warrant-dev/warrant-go/v5"
 )
 
-func ReadObjectArg(arg string) (string, string, error) {
+func ReadObjectArg(arg string, idRequired bool) (string, string, error) {
 	if strings.Contains(arg, "#") {
 		return "", "", fmt.Errorf("invalid object: cannot contain '#'")
 	}
 	typeAndId := strings.Split(arg, ":")
 	if len(typeAndId) == 1 {
+		if idRequired {
+			return "", "", fmt.Errorf("invalid object: missing id")
+		}
 		return typeAndId[0], "", nil
 	}
 	if len(typeAndId) == 2 {
@@ -50,7 +53,7 @@ func ReadObjectMetaArg(arg string) (map[string]interface{}, error) {
 
 func ReadSubjectArg(arg string) (string, string, string, error) {
 	objAndRelation := strings.Split(arg, "#")
-	objType, id, err := ReadObjectArg(objAndRelation[0])
+	objType, id, err := ReadObjectArg(objAndRelation[0], true)
 	if len(objAndRelation) == 1 {
 		return objType, id, "", err
 	}
@@ -69,7 +72,7 @@ func ReadCheckArgs(args []string) (*warrant.WarrantCheckParams, error) {
 		return nil, err
 	}
 	relation := args[1]
-	objectType, objectId, err := ReadObjectArg(args[2])
+	objectType, objectId, err := ReadObjectArg(args[2], true)
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +109,7 @@ func ReadWarrantArgs(args []string) (*warrant.WarrantParams, error) {
 		return nil, err
 	}
 	relation := args[1]
-	objectType, objectId, err := ReadObjectArg(args[2])
+	objectType, objectId, err := ReadObjectArg(args[2], true)
 	if err != nil {
 		return nil, err
 	}

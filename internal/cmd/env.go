@@ -16,6 +16,7 @@ package cmd
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/muesli/termenv"
 	"github.com/spf13/cobra"
@@ -55,9 +56,20 @@ warrant list`,
 	Args: cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		config := GetConfigOrExit()
-		for env := range config.Environments {
+
+		if len(config.Environments) == 1 {
+			fmt.Println(config.ActiveEnvironment)
+			return nil
+		}
+
+		envs := make([]string, 0, len(config.Environments))
+		for k := range config.Environments {
+			envs = append(envs, k)
+		}
+		sort.Strings(envs)
+		for _, env := range envs {
 			if env == config.ActiveEnvironment {
-				fmt.Println(termenv.String("* " + env).Bold().Foreground(printer.Purple))
+				fmt.Println(termenv.String("* " + env).Bold())
 			} else {
 				fmt.Println("  " + env)
 			}

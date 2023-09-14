@@ -55,7 +55,7 @@ warrant object create permission:edit-users '{"name": "Edit Users"}'`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		GetConfigOrExit()
 
-		objectType, objectId, err := reader.ReadObjectArg(args[0])
+		objectType, objectId, err := reader.ReadObjectArg(args[0], false)
 		if err != nil {
 			return err
 		}
@@ -92,7 +92,7 @@ warrant object get role:123`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		GetConfigOrExit()
 
-		objectType, objectId, err := reader.ReadObjectArg(args[0])
+		objectType, objectId, err := reader.ReadObjectArg(args[0], true)
 		if err != nil {
 			return err
 		}
@@ -117,7 +117,7 @@ warrant object update role:123 '{"name": "New name"}'`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		GetConfigOrExit()
 
-		objectType, objectId, err := reader.ReadObjectArg(args[0])
+		objectType, objectId, err := reader.ReadObjectArg(args[0], true)
 		if err != nil {
 			return err
 		}
@@ -149,7 +149,7 @@ warrant object delete role:admin`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		GetConfigOrExit()
 
-		objectType, objectId, err := reader.ReadObjectArg(args[0])
+		objectType, objectId, err := reader.ReadObjectArg(args[0], true)
 		if err != nil {
 			return err
 		}

@@ -33,7 +33,7 @@ var assignCmd = &cobra.Command{
 	Example: `
 warrant assign user:1 editor document:xyz
 warrant assign user:56 member role:admin 'domain == warrant.dev'`,
-	Args: cobra.RangeArgs(2, 3),
+	Args: cobra.RangeArgs(3, 4),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		GetConfigOrExit()
 
