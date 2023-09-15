@@ -16,6 +16,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 
 	"github.com/muesli/termenv"
@@ -28,7 +29,7 @@ import (
 var assertFlagVal string
 
 func init() {
-	checkCmd.Flags().StringVarP(&assertFlagVal, "assert", "a", "", "execute check in 'assert' mode with an expected result. Returns true if the check result matches the expected result, false otherwise.")
+	checkCmd.Flags().StringVarP(&assertFlagVal, "assert", "a", "", "execute check in 'assert' mode with an expected result. Returns 'pass' (exit:0) if the check result matches the expected result, 'fail' (exit:1) otherwise.")
 
 	rootCmd.AddCommand(checkCmd)
 }
@@ -46,10 +47,10 @@ warrant check user:56 member role:admin --assert true`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		GetConfigOrExit()
 
-		assertion := true
+		var assertVal bool
 		if assertFlagVal != "" {
 			var err error
-			assertion, err = strconv.ParseBool(assertFlagVal)
+			assertVal, err = strconv.ParseBool(assertFlagVal)
 			if err != nil {
 				return err
 			}
@@ -65,10 +66,21 @@ warrant check user:56 member role:admin --assert true`,
 			return err
 		}
 
-		if checkResult == assertion {
-			fmt.Println(termenv.String("true").Foreground(printer.Green))
+		if assertFlagVal != "" {
+			// Assert
+			if checkResult == assertVal {
+				fmt.Println(termenv.String(printer.Checkmark + " passed").Foreground(printer.Green))
+			} else {
+				fmt.Println(termenv.String(printer.Cross + " failed").Foreground(printer.Red))
+				os.Exit(1)
+			}
 		} else {
-			fmt.Println(termenv.String("false").Foreground(printer.Red))
+			// Check
+			if checkResult {
+				fmt.Println(termenv.String(printer.Checkmark + " true").Foreground(printer.Green))
+			} else {
+				fmt.Println(termenv.String(printer.Cross + " false").Foreground(printer.Red))
+			}
 		}
 
 		return nil

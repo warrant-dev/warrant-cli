@@ -46,7 +46,6 @@ func initConfig() {
 	cmdConfig = config.LoadConfig()
 	warrant.ApiKey = cmdConfig.Environments[cmdConfig.ActiveEnvironment].ApiKey
 	warrant.ApiEndpoint = cmdConfig.Environments[cmdConfig.ActiveEnvironment].ApiEndpoint
-	warrant.AuthorizeEndpoint = cmdConfig.Environments[cmdConfig.ActiveEnvironment].ApiEndpoint
 }
 
 func GetConfigOrExit() *config.Config {

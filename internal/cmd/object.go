@@ -16,6 +16,7 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/warrant-dev/warrant-cli/internal/printer"
@@ -34,8 +35,8 @@ func init() {
 
 var objectCmd = &cobra.Command{
 	Use:   "object",
-	Short: "Operate on objects (get, create, update, delete)",
-	Long:  "Operate on objects (get, create, update, delete), including their metadata.",
+	Short: "Operate on objects (create, get, update, delete)",
+	Long:  "Operate on objects (create, get, update, delete), including their metadata.",
 	Example: `
 warrant object create role:admin
 warrant object get role:admin
@@ -55,12 +56,18 @@ warrant object create permission:edit-users '{"name": "Edit Users"}'`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		GetConfigOrExit()
 
-		objectType, objectId, err := reader.ReadObjectArg(args[0], false)
-		if err != nil {
-			return err
+		typeAndId := strings.Split(args[0], ":")
+		if len(typeAndId) > 2 {
+			printer.PrintErrAndExit("invalid object provided, must be 'type' or 'type:id'")
+		}
+		objectType := typeAndId[0]
+		objectId := ""
+		if len(typeAndId) == 2 {
+			objectId = typeAndId[1]
 		}
 
 		var meta map[string]interface{}
+		var err error
 		if len(args) == 2 {
 			meta, err = reader.ReadObjectMetaArg(args[1])
 			if err != nil {
@@ -92,7 +99,7 @@ warrant object get role:123`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		GetConfigOrExit()
 
-		objectType, objectId, err := reader.ReadObjectArg(args[0], true)
+		objectType, objectId, err := reader.ReadObjectArg(args[0])
 		if err != nil {
 			return err
 		}
@@ -110,14 +117,14 @@ warrant object get role:123`,
 var updateCmd = &cobra.Command{
 	Use:   "update <object> <meta>",
 	Short: "Update an object's (specified as type:id) meta",
-	Long:  "Update an object's (specified as type:id) meta. Object 'meta' must be passed as a json string. Note that an object's existing id cannot be updated.",
+	Long:  "Update an object's (specified as type:id) meta. Object 'meta' must be passed as a json string. Note that an object's existing type and id cannot be updated.",
 	Example: `
 warrant object update role:123 '{"name": "New name"}'`,
 	Args: cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		GetConfigOrExit()
 
-		objectType, objectId, err := reader.ReadObjectArg(args[0], true)
+		objectType, objectId, err := reader.ReadObjectArg(args[0])
 		if err != nil {
 			return err
 		}
@@ -149,7 +156,7 @@ warrant object delete role:admin`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		GetConfigOrExit()
 
-		objectType, objectId, err := reader.ReadObjectArg(args[0], true)
+		objectType, objectId, err := reader.ReadObjectArg(args[0])
 		if err != nil {
 			return err
 		}

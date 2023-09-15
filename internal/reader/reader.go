@@ -21,48 +21,52 @@ import (
 	"os"
 	"strings"
 
+	"github.com/pkg/errors"
 	"github.com/warrant-dev/warrant-cli/internal/config"
 	"github.com/warrant-dev/warrant-go/v5"
 )
 
-func ReadObjectArg(arg string, idRequired bool) (string, string, error) {
-	if strings.Contains(arg, "#") {
-		return "", "", fmt.Errorf("invalid object: cannot contain '#'")
-	}
+// Read an objectType and objectId from string
+func ReadObjectArg(arg string) (string, string, error) {
 	typeAndId := strings.Split(arg, ":")
-	if len(typeAndId) == 1 {
-		if idRequired {
-			return "", "", fmt.Errorf("invalid object: missing id")
-		}
-		return typeAndId[0], "", nil
+	if len(typeAndId) != 2 {
+		return "", "", fmt.Errorf("invalid object")
 	}
-	if len(typeAndId) == 2 {
-		return typeAndId[0], typeAndId[1], nil
-	}
-	return "", "", fmt.Errorf("invalid object")
+
+	return typeAndId[0], typeAndId[1], nil
 }
 
+// Read object metadata from json string
 func ReadObjectMetaArg(arg string) (map[string]interface{}, error) {
 	var meta map[string]interface{}
 	err := json.Unmarshal([]byte(arg), &meta)
 	if err != nil {
-		return meta, err
+		return meta, errors.Wrap(err, "invalid object meta")
 	}
 	return meta, nil
 }
 
+// Read subjectType, subjectId and optional relation from a subject string
 func ReadSubjectArg(arg string) (string, string, string, error) {
-	objAndRelation := strings.Split(arg, "#")
-	objType, id, err := ReadObjectArg(objAndRelation[0], true)
-	if len(objAndRelation) == 1 {
-		return objType, id, "", err
+	subjectAndRelation := strings.Split(arg, "#")
+	if len(subjectAndRelation) > 2 {
+		return "", "", "", fmt.Errorf("invalid subject")
 	}
-	if len(objAndRelation) == 2 {
-		return objType, id, objAndRelation[1], err
+	typeAndId := strings.Split(subjectAndRelation[0], ":")
+	if len(typeAndId) != 2 {
+		return "", "", "", fmt.Errorf("invalid subject")
 	}
+	if len(subjectAndRelation) == 1 {
+		return typeAndId[0], typeAndId[1], "", nil
+	}
+	if len(subjectAndRelation) == 2 {
+		return typeAndId[0], typeAndId[1], subjectAndRelation[1], nil
+	}
+
 	return "", "", "", fmt.Errorf("invalid subject")
 }
 
+// Read subject, relation, object and optional context from args
 func ReadCheckArgs(args []string) (*warrant.WarrantCheckParams, error) {
 	if len(args) < 3 || len(args) > 4 {
 		return nil, fmt.Errorf("invalid check: %s", args)
@@ -72,7 +76,7 @@ func ReadCheckArgs(args []string) (*warrant.WarrantCheckParams, error) {
 		return nil, err
 	}
 	relation := args[1]
-	objectType, objectId, err := ReadObjectArg(args[2], true)
+	objectType, objectId, err := ReadObjectArg(args[2])
 	if err != nil {
 		return nil, err
 	}
@@ -100,6 +104,7 @@ func ReadCheckArgs(args []string) (*warrant.WarrantCheckParams, error) {
 	}, nil
 }
 
+// Read subject, relation, object and optional policy from args
 func ReadWarrantArgs(args []string) (*warrant.WarrantParams, error) {
 	if len(args) < 3 || len(args) > 4 {
 		return nil, fmt.Errorf("invalid warrant: %s", args)
@@ -109,7 +114,7 @@ func ReadWarrantArgs(args []string) (*warrant.WarrantParams, error) {
 		return nil, err
 	}
 	relation := args[1]
-	objectType, objectId, err := ReadObjectArg(args[2], true)
+	objectType, objectId, err := ReadObjectArg(args[2])
 	if err != nil {
 		return nil, err
 	}
