@@ -15,42 +15,31 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
-	"github.com/warrant-dev/warrant-cli/internal/config"
-	"github.com/warrant-dev/warrant-cli/internal/reader"
+	"github.com/warrant-dev/warrant-cli/internal/printer"
+	"github.com/warrant-dev/warrant-go/v5"
 )
 
 func init() {
-	rootCmd.AddCommand(initCmd)
+	rootCmd.AddCommand(queryCmd)
 }
 
-var initCmd = &cobra.Command{
-	Use:   "init",
-	Short: "Initialize the CLI for use",
-	Long:  "Initialize the CLI for use, including configuring an environment and API key.",
+var queryCmd = &cobra.Command{
+	Use:   "query <queryString>",
+	Short: "Run a provided Warrant query",
+	Long:  "Run a provided Warrant query.",
 	Example: `
-warrant init`,
-	Args: cobra.NoArgs,
+warrant query 'select explicit *'`,
+	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		envName, env, err := reader.ReadEnvFromConsole()
+		GetConfigOrExit()
+
+		result, err := warrant.Query(args[0], &warrant.ListWarrantParams{})
 		if err != nil {
 			return err
 		}
 
-		fmt.Println("Creating ~/.warrant.json")
-		envMap := make(map[string]config.Environment)
-		envMap[envName] = *env
-		newConfig := config.Config{
-			ActiveEnvironment: envName,
-			Environments:      envMap,
-		}
-		err = newConfig.Write()
-		if err != nil {
-			return err
-		}
-		fmt.Println("Setup complete")
+		printer.PrintJson(result)
 
 		return nil
 	},

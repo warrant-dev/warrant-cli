@@ -16,86 +16,73 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"strconv"
 
+	"github.com/muesli/termenv"
 	"github.com/spf13/cobra"
-	"github.com/warrant-dev/warrant-cli/internal/config"
+	"github.com/warrant-dev/warrant-cli/internal/printer"
 	"github.com/warrant-dev/warrant-cli/internal/reader"
-	"github.com/warrant-dev/warrant-go/v3"
+	"github.com/warrant-dev/warrant-go/v5"
 )
 
+var assertFlagVal string
+
 func init() {
+	checkCmd.Flags().StringVarP(&assertFlagVal, "assert", "a", "", "execute check in 'assert' mode with an expected result. Returns 'pass' (exit:0) if the check result matches the expected result, 'fail' (exit:1) otherwise.")
+
 	rootCmd.AddCommand(checkCmd)
 }
 
 var checkCmd = &cobra.Command{
-	Use:   "check [type:id] [hasPermission|hasRole|hasFeature|relation] [id|type:id]",
-	Short: "Check if an object (specified as type:id) has a given permission, role, feature or relationship to another object",
-	Long: `
-Check if an object (specified as type:id) has a given permission, role, feature or relationship to another object. Supported checks include:
-
-warrant check user:id hasPermission perm1
-warrant check user:id hasRole admin
-warrant check user:id hasFeature feature1
-warrant check user:id member tenant:id`,
+	Use:   "check <subject> <relation> <object> [context]",
+	Short: "Check if a subject has a given relation with an object",
+	Long:  "Check if a subject (specified as 'type:id') has a given 'relation' with an object (also specified as 'type:id'). Returns 'true' if the relation exists, 'false' otherwise. Checks can also include an optional 'context' (as a json string) for policy evaluation.",
 	Example: `
-warrant check user:56 hasPermission view-dashboards
-warrant check user:45 hasRole admin
-warrant check user:1 hasFeature dashboard
-warrant check user:2 editor document:xyz`,
-	Args: cobra.ExactArgs(3),
+warrant check user:56 member role:admin
+warrant check user:2 editor document:xyz
+warrant check user:56 member tenant:x '{"clientIp": "192.168.0.1"}'
+warrant check user:56 member role:admin --assert true`,
+	Args: cobra.RangeArgs(3, 4),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		err := config.Init()
-		if err != nil {
-			return err
-		}
-		subject, err := reader.ParseObject(args[0])
-		if err != nil {
-			return err
-		}
-		toCheck := args[1]
+		GetConfigOrExit()
 
-		result := false
-		if toCheck == "hasPermission" && subject.Type == "user" {
-			result, err = warrant.CheckUserHasPermission(&warrant.PermissionCheckParams{
-				PermissionId: args[2],
-				UserId:       subject.Id,
-			})
-		} else if toCheck == "hasRole" && subject.Type == "user" {
-			result, err = warrant.CheckUserHasRole(&warrant.RoleCheckParams{
-				RoleId: args[2],
-				UserId: subject.Id,
-			})
-		} else if toCheck == "hasFeature" {
-			result, err = warrant.CheckHasFeature(&warrant.FeatureCheckParams{
-				FeatureId: args[2],
-				Subject: warrant.Subject{
-					ObjectType: subject.Type,
-					ObjectId:   subject.Id,
-				},
-			})
-		} else {
-			object, e := reader.ParseObject(args[2])
-			if e != nil {
-				return e
+		var assertVal bool
+		if assertFlagVal != "" {
+			var err error
+			assertVal, err = strconv.ParseBool(assertFlagVal)
+			if err != nil {
+				return err
 			}
-			result, err = warrant.Check(&warrant.WarrantCheckParams{
-				WarrantCheck: warrant.WarrantCheck{
-					Object: warrant.Object{
-						ObjectType: object.Type,
-						ObjectId:   object.Id,
-					},
-					Relation: toCheck,
-					Subject: warrant.Subject{
-						ObjectType: subject.Type,
-						ObjectId:   subject.Id,
-					},
-				},
-			})
 		}
+
+		checkSpec, err := reader.ReadCheckArgs(args)
 		if err != nil {
 			return err
 		}
-		fmt.Printf("%t\n", result)
+
+		checkResult, err := warrant.Check(checkSpec)
+		if err != nil {
+			return err
+		}
+
+		if assertFlagVal != "" {
+			// Assert
+			if checkResult == assertVal {
+				fmt.Println(termenv.String(printer.Checkmark + " passed").Foreground(printer.Green))
+			} else {
+				fmt.Println(termenv.String(printer.Cross + " failed").Foreground(printer.Red))
+				os.Exit(1)
+			}
+		} else {
+			// Check
+			if checkResult {
+				fmt.Println(termenv.String(printer.Checkmark + " true").Foreground(printer.Green))
+			} else {
+				fmt.Println(termenv.String(printer.Cross + " false").Foreground(printer.Red))
+			}
+		}
+
 		return nil
 	},
 }
