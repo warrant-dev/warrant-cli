@@ -34,7 +34,7 @@ warrant query 'select explicit *'`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		GetConfigOrExit()
 
-		result, err := warrant.Query(args[0], &warrant.ListWarrantParams{})
+		result, err := warrant.Query(args[0], &warrant.QueryParams{})
 		if err != nil {
 			return err
 		}
