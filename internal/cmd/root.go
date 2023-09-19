@@ -21,15 +21,16 @@ import (
 	"github.com/warrant-dev/warrant-go/v5"
 )
 
-var version = ""
-
 var cmdConfig *config.Config
 
 var rootCmd = &cobra.Command{
-	Use:     "warrant",
-	Short:   "Warrant CLI",
-	Long:    `The Warrant CLI is a tool to interact with Warrant via the command line.`,
-	Version: version,
+	Use:   "warrant",
+	Short: "Warrant CLI",
+	Long:  `The Warrant CLI is a tool to interact with Warrant via the command line.`,
+}
+
+func SetVersion(version string) {
+	rootCmd.Version = version
 }
 
 func Execute() {

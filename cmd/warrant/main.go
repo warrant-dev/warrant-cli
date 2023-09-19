@@ -16,6 +16,9 @@ package main
 
 import "github.com/warrant-dev/warrant-cli/internal/cmd"
 
+var version = "dev"
+
 func main() {
+	cmd.SetVersion(version)
 	cmd.Execute()
 }
