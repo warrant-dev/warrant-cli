@@ -20,7 +20,11 @@ import (
 	"github.com/warrant-dev/warrant-go/v5"
 )
 
+var queryWarrantToken string
+
 func init() {
+	queryCmd.Flags().StringVarP(&queryWarrantToken, "warrant-token", "w", "", "optional warrant token header value to include in query request")
+
 	rootCmd.AddCommand(queryCmd)
 }
 
@@ -34,6 +38,12 @@ warrant query 'select explicit *'`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		GetConfigOrExit()
 
+		queryParams := &warrant.QueryParams{}
+		if queryWarrantToken != "" {
+			queryParams.RequestOptions = warrant.RequestOptions{
+				WarrantToken: queryWarrantToken,
+			}
+		}
 		result, err := warrant.Query(args[0], &warrant.QueryParams{})
 		if err != nil {
 			return err

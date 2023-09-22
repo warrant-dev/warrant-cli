@@ -22,9 +22,11 @@ import (
 )
 
 var typesFile string
+var listObjecttypeWarrantToken string
 
 func init() {
 	applyObjecttypeCmd.Flags().StringVarP(&typesFile, "file", "f", "", "file containing object type definitions")
+	listObjecttypeCmd.Flags().StringVarP(&listObjecttypeWarrantToken, "warrant-token", "w", "", "optional warrant token header value to include in list objecttypes request")
 
 	objecttypeCmd.AddCommand(listObjecttypeCmd)
 	objecttypeCmd.AddCommand(applyObjecttypeCmd)
@@ -50,7 +52,13 @@ warrant objecttype list`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		GetConfigOrExit()
 
-		types, err := objecttype.ListObjectTypes(&warrant.ListObjectTypeParams{})
+		listParams := &warrant.ListObjectTypeParams{}
+		if listObjecttypeWarrantToken != "" {
+			listParams.RequestOptions = warrant.RequestOptions{
+				WarrantToken: listObjecttypeWarrantToken,
+			}
+		}
+		types, err := objecttype.ListObjectTypes(listParams)
 		if err != nil {
 			return err
 		}
