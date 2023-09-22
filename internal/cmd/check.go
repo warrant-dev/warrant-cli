@@ -28,12 +28,12 @@ import (
 
 var assertFlagVal string
 var debug bool
-var warrantToken string
+var checkWarrantToken string
 
 func init() {
 	checkCmd.Flags().StringVarP(&assertFlagVal, "assert", "a", "", "execute check in 'assert' mode with an expected result. Returns 'pass' (exit:0) if the check result matches the expected result, 'fail' (exit:1) otherwise.")
 	checkCmd.Flags().BoolVarP(&debug, "debug", "d", false, "run check in debug mode")
-	checkCmd.Flags().StringVarP(&warrantToken, "warrant-token", "w", "", "optional warrant token header value to include in check request")
+	checkCmd.Flags().StringVarP(&checkWarrantToken, "warrant-token", "w", "", "optional warrant token header value to include in check request")
 
 	rootCmd.AddCommand(checkCmd)
 }
@@ -66,8 +66,8 @@ warrant check user:56 member role:admin --assert true`,
 		}
 		checkSpec.Debug = debug
 
-		if warrantToken != "" {
-			checkSpec.WarrantToken = warrantToken
+		if checkWarrantToken != "" {
+			checkSpec.WarrantToken = checkWarrantToken
 		}
 
 		checkResult, err := warrant.Check(checkSpec)
