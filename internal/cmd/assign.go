@@ -46,8 +46,21 @@ warrant assign user:56 member role:admin 'domain == warrant.dev'`,
 		if err != nil {
 			return err
 		}
-		fmt.Println("Created warrant")
+		fmt.Printf("assigned %s\n", warrantAsString(warrantSpec))
 
 		return nil
 	},
+}
+
+func warrantAsString(w *warrant.WarrantParams) string {
+	subject := fmt.Sprintf("%s:%s", w.Subject.ObjectType, w.Subject.ObjectId)
+	if w.Subject.Relation != "" {
+		subject = fmt.Sprintf("%s#%s", subject, w.Subject.Relation)
+	}
+	s := fmt.Sprintf("%s %s %s:%s", subject, w.Relation, w.ObjectType, w.ObjectId)
+	if w.Policy != "" {
+		s = fmt.Sprintf("%s %s", s, w.Policy)
+	}
+
+	return s
 }

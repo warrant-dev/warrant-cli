@@ -7,7 +7,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.17.0
-	github.com/warrant-dev/warrant-go/v5 v5.2.0
+	github.com/warrant-dev/warrant-go/v5 v5.3.0
 )
 
 require (

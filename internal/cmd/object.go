@@ -83,7 +83,11 @@ warrant object create permission:edit-users '{"name": "Edit Users"}'`,
 		if err != nil {
 			return err
 		}
-		printer.PrintJson(newObj)
+
+		fmt.Printf("created %s:%s\n", newObj.ObjectType, newObj.ObjectId)
+		if len(newObj.Meta) > 0 {
+			printer.PrintJson(newObj.Meta)
+		}
 
 		return nil
 	},
@@ -108,7 +112,11 @@ warrant object get role:123`,
 		if err != nil {
 			return err
 		}
-		printer.PrintJson(obj)
+
+		fmt.Printf("%s:%s\n", obj.ObjectType, obj.ObjectId)
+		if len(obj.Meta) > 0 {
+			printer.PrintJson(obj.Meta)
+		}
 
 		return nil
 	},
@@ -140,7 +148,11 @@ warrant object update role:123 '{"name": "New name"}'`,
 		if err != nil {
 			return err
 		}
-		printer.PrintJson(updatedObj)
+
+		fmt.Printf("updated %s:%s\n", updatedObj.ObjectType, updatedObj.ObjectId)
+		if len(updatedObj.Meta) > 0 {
+			printer.PrintJson(updatedObj.Meta)
+		}
 
 		return nil
 	},
@@ -165,7 +177,8 @@ warrant object delete role:admin`,
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Deleted object\n")
+
+		fmt.Printf("deleted %s:%s\n", objectType, objectId)
 
 		return nil
 	},
