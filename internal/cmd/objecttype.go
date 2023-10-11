@@ -15,18 +15,24 @@
 package cmd
 
 import (
+	"bufio"
+	"encoding/json"
+	"fmt"
+	"io"
+	"os"
+
 	"github.com/spf13/cobra"
 	"github.com/warrant-dev/warrant-cli/internal/printer"
 	"github.com/warrant-dev/warrant-go/v5"
 	"github.com/warrant-dev/warrant-go/v5/objecttype"
 )
 
-var typesFile string
 var listObjecttypeWarrantToken string
+var typesFile string
 
 func init() {
-	applyObjecttypeCmd.Flags().StringVarP(&typesFile, "file", "f", "", "file containing object type definitions")
 	listObjecttypeCmd.Flags().StringVarP(&listObjecttypeWarrantToken, "warrant-token", "w", "", "optional warrant token header value to include in list objecttypes request")
+	applyObjecttypeCmd.Flags().StringVarP(&typesFile, "file", "f", "", "file containing object type definitions")
 
 	objecttypeCmd.AddCommand(listObjecttypeCmd)
 	objecttypeCmd.AddCommand(applyObjecttypeCmd)
@@ -44,8 +50,8 @@ warrant objecttype apply -f types.json`,
 
 var listObjecttypeCmd = &cobra.Command{
 	Use:   "list",
-	Short: "List all object types in environment",
-	Long:  "List all object types in environment.",
+	Short: "List all object types in active environment",
+	Long:  "List all object types in active environment.",
 	Example: `
 warrant objecttype list`,
 	Args: cobra.NoArgs,
@@ -70,13 +76,48 @@ warrant objecttype list`,
 
 var applyObjecttypeCmd = &cobra.Command{
 	Use:   "apply",
-	Short: "Apply updated object types configuration",
-	Long:  "Apply updated object types configuration. New object type definitions can be provided via file (-f) or stdin.",
+	Short: "Apply updated object types configuration to active environment",
+	Long:  "Apply updated object types configuration to active environment. New object type definitions can be provided via file (-f) or stdin.",
 	Example: `
 warrant objecttype apply -f types.json`,
 	Args: cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		GetConfigOrExit()
+
+		var bytes []byte
+		var err error
+		if typesFile != "" {
+			// Read from file if filename provided
+			jsonFile, err := os.Open(typesFile)
+			if err != nil {
+				return err
+			}
+			defer jsonFile.Close()
+
+			bytes, err = io.ReadAll(jsonFile)
+			if err != nil {
+				return err
+			}
+		} else {
+			// Else read from stdin
+			bytes, err = io.ReadAll(bufio.NewReader(os.Stdin))
+			if err != nil {
+				return err
+			}
+		}
+
+		var objectTypes []warrant.ObjectTypeParams
+		err = json.Unmarshal(bytes, &objectTypes)
+		if err != nil {
+			return err
+		}
+
+		_, err = objecttype.BatchUpdate(objectTypes)
+		if err != nil {
+			return err
+		}
+
+		fmt.Println("objecttypes updated")
 
 		return nil
 	},
