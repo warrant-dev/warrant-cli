@@ -1,7 +1,3 @@
-run:
-  skip-dirs:
-    - migrations
-    - tests
 linters:
   enable-all: true
   disable:
@@ -26,6 +22,7 @@ linters:
     # - exhaustive
     - exhaustruct
     # - forcetypeassert
+    - forbidigo
     - funlen
     - gci
     - gochecknoglobals
@@ -89,6 +86,6 @@ linters-settings:
   maintidx:
     under: 10
 issues:
-  new-from-rev: 3f04848d5a946826ab51f00361d6793761ca6616
+  new-from-rev: 46ca9cb0f3fb283113388fcabd762b8c55eda2be
   max-issues-per-linter: 0
   max-same-issues: 0
