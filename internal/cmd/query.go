@@ -21,9 +21,13 @@ import (
 )
 
 var queryWarrantToken string
+var queryLimit int
+var queryAfterId string
 
 func init() {
 	queryCmd.Flags().StringVarP(&queryWarrantToken, "warrant-token", "w", "", "optional warrant token header value to include in query request")
+	queryCmd.Flags().IntVarP(&queryLimit, "limit", "l", 0, "optional query result set limit")
+	queryCmd.Flags().StringVar(&queryAfterId, "afterId", "", "optional afterId to include for paginating result set")
 
 	rootCmd.AddCommand(queryCmd)
 }
@@ -44,6 +48,13 @@ warrant query 'select explicit *'`,
 				WarrantToken: queryWarrantToken,
 			}
 		}
+		if queryLimit > 0 {
+			queryParams.Limit = queryLimit
+		}
+		if queryAfterId != "" {
+			queryParams.AfterId = queryAfterId
+		}
+
 		result, err := warrant.Query(args[0], &warrant.QueryParams{})
 		if err != nil {
 			return err
