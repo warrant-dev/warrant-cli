@@ -39,7 +39,7 @@ warrant init`,
 			return err
 		}
 
-		fmt.Println("Creating ~/.warrant.json")
+		fmt.Println("creating ~/.warrant.json")
 		envMap := make(map[string]config.Environment)
 		envMap[envName] = *env
 		newConfig := config.Config{
@@ -50,7 +50,7 @@ warrant init`,
 		if err != nil {
 			return err
 		}
-		fmt.Println("Setup complete")
+		fmt.Println("setup complete")
 
 		return nil
 	},

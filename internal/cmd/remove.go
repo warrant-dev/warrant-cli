@@ -46,7 +46,7 @@ warrant remove user:56 member role:admin 'domain == warrant.dev'`,
 		if err != nil {
 			return err
 		}
-		fmt.Println("Deleted warrant")
+		fmt.Printf("removed %s\n", warrantAsString(warrantSpec))
 
 		return nil
 	},
