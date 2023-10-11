@@ -1,4 +1,4 @@
-name: Build
+name: Warrant CLI
 
 on:
   push:
