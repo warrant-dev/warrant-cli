@@ -199,8 +199,8 @@ github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcU
 github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
 github.com/subosito/gotenv v1.6.0 h1:9NlTDc1FTs4qu0DDq7AEtTPNw6SVm7uBMsUCUjABIf8=
 github.com/subosito/gotenv v1.6.0/go.mod h1:Dk4QP5c2W3ibzajGcXpNraDfq2IrhjMIvMSWPKKo0FU=
-github.com/warrant-dev/warrant-go/v5 v5.2.0 h1:5khdIdGhKLN8JeDg5jDj3oGcSpSoh9Q8kWMgD2FL7I8=
-github.com/warrant-dev/warrant-go/v5 v5.2.0/go.mod h1:00jaOr9wwpFFqPf8Ol19d38eXNyuDJMMdvyO8lINdIY=
+github.com/warrant-dev/warrant-go/v5 v5.3.0 h1:7DipZOCw7EpLffBOzNg+VVoO9klUQTd+zEvpP056XII=
+github.com/warrant-dev/warrant-go/v5 v5.3.0/go.mod h1:00jaOr9wwpFFqPf8Ol19d38eXNyuDJMMdvyO8lINdIY=
 github.com/yuin/goldmark v1.1.25/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.32/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
