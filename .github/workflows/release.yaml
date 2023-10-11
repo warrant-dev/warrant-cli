@@ -1,4 +1,4 @@
-name: Release Warrant CLI
+name: Release
 
 on:
   push:

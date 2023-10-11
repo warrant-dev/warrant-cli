@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"strconv"
@@ -75,23 +76,49 @@ warrant check user:56 member role:admin --assert true`,
 			return err
 		}
 
+		checkSpecString, err := checkSpecAsString(&checkSpec.WarrantCheck)
+		if err != nil {
+			return err
+		}
+
 		if assertFlagVal != "" {
 			// Assert
 			if checkResult == assertVal {
-				fmt.Println(termenv.String(printer.Checkmark + " passed").Foreground(printer.Green))
+				fmt.Printf("%s %s\n", termenv.String(printer.Checkmark, fmt.Sprintf("assert %t", assertVal)).Foreground(printer.Green), checkSpecString)
 			} else {
-				fmt.Println(termenv.String(printer.Cross + " failed").Foreground(printer.Red))
+				fmt.Printf("%s %s\n", termenv.String(printer.Cross, fmt.Sprintf("assert %t", assertVal)).Foreground(printer.Red), checkSpecString)
 				os.Exit(1)
 			}
 		} else {
 			// Check
 			if checkResult {
-				fmt.Println(termenv.String(printer.Checkmark + " true").Foreground(printer.Green))
+				fmt.Printf("%s %s\n", termenv.String(printer.Checkmark, "true").Foreground(printer.Green), checkSpecString)
 			} else {
-				fmt.Println(termenv.String(printer.Cross + " false").Foreground(printer.Red))
+				fmt.Printf("%s %s\n", termenv.String(printer.Cross, "false").Foreground(printer.Red), checkSpecString)
 			}
 		}
 
 		return nil
 	},
+}
+
+func checkSpecAsString(w *warrant.WarrantCheck) (string, error) {
+	// TODO: should also handle subject relation if present
+	s := fmt.Sprintf(
+		"%s:%s %s %s:%s",
+		w.Subject.GetObjectType(),
+		w.Subject.GetObjectId(),
+		w.Relation,
+		w.Object.GetObjectType(),
+		w.Object.GetObjectId(),
+	)
+	if len(w.Context) > 0 {
+		bytes, err := json.Marshal(w.Context)
+		if err != nil {
+			return "", err
+		}
+		s = fmt.Sprintf("%s '%s'", s, string(bytes))
+	}
+
+	return s, nil
 }
