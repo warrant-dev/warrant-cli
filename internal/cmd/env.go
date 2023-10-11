@@ -24,57 +24,52 @@ import (
 	"github.com/warrant-dev/warrant-cli/internal/reader"
 )
 
+var listEnvs bool
+
 func init() {
-	envCmd.AddCommand(listEnvCmd)
+	envCmd.Flags().BoolVarP(&listEnvs, "list", "l", false, "list all configured environments")
+
 	envCmd.AddCommand(addEnvCmd)
 	envCmd.AddCommand(removeEnvCmd)
 	envCmd.AddCommand(switchEnvCmd)
+
 	rootCmd.AddCommand(envCmd)
 }
 
 var envCmd = &cobra.Command{
 	Use:   "env",
-	Short: "Get the name of the current active environment",
-	Long:  "Get the name of the current active environment.",
+	Short: "List configured environment(s)",
+	Long:  "List configured environment(s), including the current active environment.",
 	Example: `
-warrant env`,
-	Args: cobra.NoArgs,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		config := GetConfigOrExit()
-		fmt.Println(config.ActiveEnvironment)
-
-		return nil
-	},
-}
-
-var listEnvCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List all configured environments",
-	Long:  "List all configured environments, including the current active environment denoted by a * prefix.",
-	Example: `
-warrant list`,
+warrant env
+warrant env --list`,
 	Args: cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		config := GetConfigOrExit()
 
-		if len(config.Environments) == 1 {
-			fmt.Println(config.ActiveEnvironment)
+		if listEnvs {
+			if len(config.Environments) == 1 {
+				fmt.Println(config.ActiveEnvironment)
+				return nil
+			}
+
+			envs := make([]string, 0, len(config.Environments))
+			for k := range config.Environments {
+				envs = append(envs, k)
+			}
+			sort.Strings(envs)
+			for _, env := range envs {
+				if env == config.ActiveEnvironment {
+					fmt.Println(termenv.String("* " + env).Bold())
+				} else {
+					fmt.Println("  " + env)
+				}
+			}
+
 			return nil
 		}
 
-		envs := make([]string, 0, len(config.Environments))
-		for k := range config.Environments {
-			envs = append(envs, k)
-		}
-		sort.Strings(envs)
-		for _, env := range envs {
-			if env == config.ActiveEnvironment {
-				fmt.Println(termenv.String("* " + env).Bold())
-			} else {
-				fmt.Println("  " + env)
-			}
-		}
-
+		fmt.Println(config.ActiveEnvironment)
 		return nil
 	},
 }
@@ -132,8 +127,8 @@ warrant remove test`,
 
 var switchEnvCmd = &cobra.Command{
 	Use:   "switch <envName>",
-	Short: "Switch to the given environment",
-	Long:  "Switch to the given environment, provided it exists in config.",
+	Short: "Switch to a given environment",
+	Long:  "Switch to a given environment, provided it exists in config.",
 	Example: `
 warrant switch prod`,
 	Args: cobra.ExactArgs(1),
