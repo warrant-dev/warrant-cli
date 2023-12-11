@@ -23,7 +23,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/warrant-dev/warrant-cli/internal/config"
-	"github.com/warrant-dev/warrant-go/v5"
+	"github.com/warrant-dev/warrant-go/v6"
 )
 
 // Read an objectType and objectId from string

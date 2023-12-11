@@ -23,8 +23,8 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/warrant-dev/warrant-cli/internal/printer"
-	"github.com/warrant-dev/warrant-go/v5"
-	"github.com/warrant-dev/warrant-go/v5/objecttype"
+	"github.com/warrant-dev/warrant-go/v6"
+	"github.com/warrant-dev/warrant-go/v6/objecttype"
 )
 
 var listObjecttypeWarrantToken string

@@ -21,8 +21,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/warrant-dev/warrant-cli/internal/printer"
 	"github.com/warrant-dev/warrant-cli/internal/reader"
-	"github.com/warrant-dev/warrant-go/v5"
-	"github.com/warrant-dev/warrant-go/v5/object"
+	"github.com/warrant-dev/warrant-go/v6"
+	"github.com/warrant-dev/warrant-go/v6/object"
 )
 
 func init() {
@@ -173,7 +173,7 @@ warrant object delete role:admin`,
 			return err
 		}
 
-		err = object.Delete(objectType, objectId)
+		_, err = object.Delete(objectType, objectId)
 		if err != nil {
 			return err
 		}
