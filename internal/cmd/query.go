@@ -17,18 +17,19 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"github.com/warrant-dev/warrant-cli/internal/printer"
-	"github.com/warrant-dev/warrant-go/v5"
+	"github.com/warrant-dev/warrant-go/v6"
 )
 
 var queryWarrantToken string
 var queryLimit int
-var queryAfterId string
+var queryNextCursor string
+var queryPrevCursor string
 
 func init() {
 	queryCmd.Flags().StringVarP(&queryWarrantToken, "warrant-token", "w", "", "optional warrant token header value to include in query request")
 	queryCmd.Flags().IntVarP(&queryLimit, "limit", "l", 0, "optional query result set limit")
-	queryCmd.Flags().StringVar(&queryAfterId, "afterId", "", "optional afterId to include for paginating result set")
-
+	queryCmd.Flags().StringVar(&queryNextCursor, "nextCursor", "", "optional nextCursor string for pagination")
+	queryCmd.Flags().StringVar(&queryPrevCursor, "prevCursor", "", "optional prevCursor string for pagination")
 	rootCmd.AddCommand(queryCmd)
 }
 
@@ -51,8 +52,11 @@ warrant query 'select explicit *'`,
 		if queryLimit > 0 {
 			queryParams.Limit = queryLimit
 		}
-		if queryAfterId != "" {
-			queryParams.AfterId = queryAfterId
+		if queryNextCursor != "" {
+			queryParams.NextCursor = queryNextCursor
+		}
+		if queryPrevCursor != "" {
+			queryParams.PrevCursor = queryPrevCursor
 		}
 
 		result, err := warrant.Query(args[0], &warrant.QueryParams{})

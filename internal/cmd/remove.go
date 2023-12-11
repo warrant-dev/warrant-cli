@@ -19,7 +19,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/warrant-dev/warrant-cli/internal/reader"
-	"github.com/warrant-dev/warrant-go/v5"
+	"github.com/warrant-dev/warrant-go/v6"
 )
 
 func init() {
@@ -42,7 +42,7 @@ warrant remove user:56 member role:admin 'domain == warrant.dev'`,
 			return err
 		}
 
-		err = warrant.Delete(warrantSpec)
+		_, err = warrant.Delete(warrantSpec)
 		if err != nil {
 			return err
 		}
