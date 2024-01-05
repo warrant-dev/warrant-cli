@@ -64,9 +64,21 @@ warrant objecttype list`,
 				WarrantToken: listObjecttypeWarrantToken,
 			}
 		}
-		types, err := objecttype.ListObjectTypes(listParams)
-		if err != nil {
-			return err
+
+		// Fetch all objecttypes (paginate if necessary)
+		var types []warrant.ObjectType
+		for {
+			typesResp, err := objecttype.ListObjectTypes(listParams)
+			if err != nil {
+				return err
+			}
+			types = append(types, typesResp.Results...)
+
+			if typesResp.NextCursor == "" {
+				break
+			} else {
+				listParams.NextCursor = typesResp.NextCursor
+			}
 		}
 		printer.PrintJson(types)
 
