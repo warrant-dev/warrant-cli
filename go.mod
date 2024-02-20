@@ -1,6 +1,6 @@
 module github.com/warrant-dev/warrant-cli
 
-go 1.21
+go 1.22
 
 require (
 	github.com/muesli/termenv v0.15.2
